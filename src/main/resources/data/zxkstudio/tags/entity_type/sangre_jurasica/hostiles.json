@@ -1,0 +1,24 @@
+{
+  "values": [
+    {
+      "id": "alexscaves:subterranodon",
+      "required": false
+    },
+    {
+      "id": "alexscaves:vallumraptor",
+      "required": false
+    },
+    {
+      "id": "alexscaves:tremorsaurus",
+      "required": false
+    },
+    {
+      "id": "alexscaves:relicheirus",
+      "required": false
+    },
+    {
+      "id": "alexscaves:atlatitan",
+      "required": false
+    }
+  ]
+}

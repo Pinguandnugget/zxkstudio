@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "pattern": [
+    "ABL",
+    " E "
+  ],
+  "key": {
+    "A": { "item": "alexscaves:amber_curiosity" },
+    "B": { "item": "minecraft:glass_bottle" },
+    "L": { "item": "alexscaves:pewen_branch" },
+    "E": { "item": "alexscaves:subterranodon_egg" }
+  },
+  "result": {
+    "id": "zxkstudio:antidoto_ambar",
+    "count": 1
+  }
+}

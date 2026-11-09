@@ -1,1 +1,63 @@
-# zxkstudio
+# zxkstudio — Fabric 1.21.1
+
+Mod en Java con **Sangre Jurásica**: los dinosaurios te infectan al golpearte, tienes un
+tiempo para beber el **Antídoto de Ámbar** y, si no lo haces, entras en fase terminal.
+Es la versión en código del datapack `sangre_jurasica`.
+
+> Este código está escrito pero **todavía no se ha compilado ni probado en el juego**.
+> Si al compilar sale algún error, pégaselo a Claude y se corrige.
+
+## Cómo compilarlo
+
+Necesitas **Java 21** (JDK) instalado.
+
+1. Entra a https://fabricmc.net/develop y genera una plantilla: Minecraft **1.21.1**,
+   mappings **Yarn**, Java 21. Descomprímela.
+2. De la plantilla, copia la carpeta `gradle/` y los archivos `gradlew` y `gradlew.bat`
+   dentro de esta carpeta (para tener el wrapper de Gradle).
+3. Abre `gradle.properties` de la plantilla y compara con el de aquí. Si Gradle se queja de
+   alguna versión, usa las de la plantilla: `loader_version`, `loom_version`, `fabric_version`.
+4. En esta carpeta ejecuta `./gradlew build` (en Windows: `gradlew.bat build`).
+5. El mod queda en `build/libs/zxkstudio-1.0.0.jar` (no uses el que termina en `-sources`).
+
+Para jugar necesitas **Fabric Loader** y **Fabric API** para 1.21.1. El mod tiene que estar
+instalado en el servidor y también en los clientes.
+
+## Comandos
+
+Todos requieren ser operador. `/sj` es lo mismo que `/sangrejurasica`.
+Sin valor, cada comando muestra el valor actual.
+
+| Comando | Qué ajusta |
+|---|---|
+| `/sj estado` | Muestra todos los valores |
+| `/sj tiempo <segundos>` | Duración de la fase 1 (por defecto 300) |
+| `/sj dano <valor>` | Daño de cada golpe en fase terminal (2.0 = 1 corazón) |
+| `/sj intervalo <segundos>` | Cada cuántos segundos llega ese daño (por defecto 1) |
+| `/sj veneno <nivel>` | Veneno en fase terminal, 0 = sin veneno (por defecto 0) |
+| `/sj debilidad <nivel>` | Debilidad, 0 = apagada (por defecto 1) |
+| `/sj lentitud <nivel>` | Lentitud, 0 = apagada (por defecto 1) |
+| `/sj nausea <true/false>` | Náuseas |
+| `/sj oscuridad <true/false>` | Oscuridad |
+| `/sj latido <true/false>` | Sonido de latido |
+| `/sj particulas <true/false>` | Partículas |
+| `/sj mensajes <true/false>` | Mensajes en el chat |
+| `/sj provocar <true/false>` | Los dinosaurios hostiles atacan de lejos |
+| `/sj radio <bloques>` | Radio de esa provocación (por defecto 20) |
+| `/sj activo <true/false>` | Apaga o enciende todo el sistema |
+| `/sj infectar <jugadores>` | Infecta a los jugadores indicados |
+| `/sj curar <jugadores>` | Cura a los jugadores indicados |
+| `/sj antidoto <jugadores>` | Da el Antídoto de Ámbar |
+| `/sj recargar` | Vuelve a leer el archivo de configuración |
+| `/sj restablecer` | Deja todo con los valores por defecto |
+
+Los valores se guardan en `config/zxkstudio_sangre_jurasica.json`.
+
+## Notas
+
+- Morir cura la infección (igual que en el datapack).
+- La receta del antídoto usa objetos de Alex's Caves. Si ese mod no está, la receta no
+  carga, pero lo demás funciona y el antídoto se puede dar con `/sj antidoto`.
+- Los tags de dinosaurios están en `data/zxkstudio/tags/entity_type/sangre_jurasica/`
+  y se pueden cambiar con un datapack.
+- No dejes instalado el datapack `sangre_jurasica` original junto con este mod: harían lo mismo dos veces.

@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "zxkstudio",
+  "version": "${version}",
+  "name": "zxkstudio",
+  "description": "Contenido de zxkstudio. Incluye Sangre Jurásica: infección por dinosaurios, antídoto de ámbar y comandos para ajustarlo todo.",
+  "authors": ["zxkstudio"],
+  "license": "All-Rights-Reserved",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.zxkstudio.ZxkStudio"]
+  },
+  "depends": {
+    "fabricloader": ">=0.16.0",
+    "minecraft": "~1.21.1",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
