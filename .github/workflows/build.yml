@@ -1,0 +1,30 @@
+name: Compilar mod
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # Instala Gradle directamente, así no hace falta el wrapper (gradlew)
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+
+      - name: Compilar
+        run: gradle build --stacktrace
+
+      - name: Subir el mod
+        uses: actions/upload-artifact@v4
+        with:
+          name: zxkstudio-mod
+          path: build/libs/*.jar
