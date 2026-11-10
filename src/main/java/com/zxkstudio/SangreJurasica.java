@@ -35,7 +35,7 @@ public final class SangreJurasica {
 
 	public static void register() {
 		ServerTickEvents.END_SERVER_TICK.register(SangreJurasica::alTick);
-		ServerLivingEntityEvents.AFTER_DAMAGE.register(SangreJurasica::alRecibirDano);
+		ServerLivingEntityEvents.ALLOW_DAMAGE.register(SangreJurasica::alRecibirDano);
 	}
 
 	// ------------------------------------------------------------------ eventos
@@ -64,21 +64,22 @@ public final class SangreJurasica {
 		}
 	}
 
-	private static void alRecibirDano(LivingEntity entidad, DamageSource fuente,
-			float danoBase, float danoRecibido, boolean bloqueado) {
-		if (bloqueado || !(entidad instanceof ServerPlayerEntity jugador)) {
-			return;
+	/** Nunca cancela el daño (siempre devuelve true); solo aprovecha el evento para infectar. */
+	private static boolean alRecibirDano(LivingEntity entidad, DamageSource fuente, float cantidad) {
+		if (!(entidad instanceof ServerPlayerEntity jugador) || cantidad <= 0.0f) {
+			return true;
 		}
 		if (!SangreConfig.get().activo || jugador.isCreative() || jugador.isSpectator()) {
-			return;
+			return true;
 		}
 		Entity atacante = fuente.getAttacker();
 		if (atacante == null || !atacante.getType().isIn(ModContent.DINOS)) {
-			return;
+			return true;
 		}
 		if (!estaInfectado(jugador)) {
 			infectar(jugador);
 		}
+		return true;
 	}
 
 	// ------------------------------------------------------------------ estado

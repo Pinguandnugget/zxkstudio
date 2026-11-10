@@ -32,9 +32,9 @@ public final class ModContent {
 	 * Segundos que le quedan al jugador antes de la fase terminal (0 = ya está en fase terminal).
 	 * Si el jugador no tiene este dato, no está infectado. No se copia al morir: morir cura.
 	 */
-	public static final AttachmentType<Integer> SANGRE_TIEMPO = AttachmentRegistry.create(
+	public static final AttachmentType<Integer> SANGRE_TIEMPO = AttachmentRegistry.createPersistent(
 			Identifier.of(ZxkStudio.MOD_ID, "sangre_jurasica_tiempo"),
-			builder -> builder.persistent(Codec.INT)
+			Codec.INT
 	);
 
 	/** Dinosaurios que infectan al golpear al jugador. */
