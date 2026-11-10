@@ -2,5 +2,14 @@
   "item.zxkstudio.antidoto_ambar": "Antídoto de Ámbar",
   "item.zxkstudio.antidoto_ambar.lore1": "Un suero ancestral destilado de ámbar y savia.",
   "item.zxkstudio.antidoto_ambar.lore2": "Cura la Sangre Jurásica.",
-  "effect.zxkstudio.sangre_jurasica": "Sangre Jurásica"
+  "effect.zxkstudio.sangre_jurasica": "Sangre Jurásica",
+  "item.zxkstudio.inmunosupresor": "Inmunosupresor",
+  "item.zxkstudio.inmunosupresor.lore1": "Inmunosupresores para tu cableado.",
+  "item.zxkstudio.inmunosupresor.lore2": "Reinicia tu reloj de inmunosupresores.",
+  "item.zxkstudio.inmunosupresor.lore3": "Cura la cyberpsychosis.",
+  "item.zxkstudio.bloqueador_neural": "Bloqueador Neural",
+  "item.zxkstudio.bloqueador_neural.lore1": "Un chip experimental de Arasaka.",
+  "item.zxkstudio.bloqueador_neural.lore2": "Inmunidad a la cyberpsychosis",
+  "item.zxkstudio.bloqueador_neural.lore3": "durante un tiempo limitado.",
+  "effect.zxkstudio.inmunosupresores": "Inmunosupresores"
 }

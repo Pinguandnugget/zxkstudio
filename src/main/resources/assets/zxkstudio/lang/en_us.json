@@ -2,5 +2,14 @@
   "item.zxkstudio.antidoto_ambar": "Amber Antidote",
   "item.zxkstudio.antidoto_ambar.lore1": "An ancient serum distilled from amber and sap.",
   "item.zxkstudio.antidoto_ambar.lore2": "Cures Jurassic Blood.",
-  "effect.zxkstudio.sangre_jurasica": "Jurassic Blood"
+  "effect.zxkstudio.sangre_jurasica": "Jurassic Blood",
+  "item.zxkstudio.inmunosupresor": "Immunosuppressant",
+  "item.zxkstudio.inmunosupresor.lore1": "Immunosuppressants for your cyberware.",
+  "item.zxkstudio.inmunosupresor.lore2": "Resets your immunosuppressant clock.",
+  "item.zxkstudio.inmunosupresor.lore3": "Cures cyberpsychosis.",
+  "item.zxkstudio.bloqueador_neural": "Neural Blocker",
+  "item.zxkstudio.bloqueador_neural.lore1": "An experimental Arasaka chip.",
+  "item.zxkstudio.bloqueador_neural.lore2": "Immunity to cyberpsychosis",
+  "item.zxkstudio.bloqueador_neural.lore3": "for a limited time.",
+  "effect.zxkstudio.inmunosupresores": "Immunosuppressants"
 }

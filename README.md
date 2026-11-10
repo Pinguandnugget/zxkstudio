@@ -1,8 +1,13 @@
 # zxkstudio — Fabric 1.21.1
 
-Mod en Java con **Sangre Jurásica**: los dinosaurios te infectan al golpearte, tienes un
-tiempo para beber el **Antídoto de Ámbar** y, si no lo haces, entras en fase terminal.
-Es la versión en código del datapack `sangre_jurasica`.
+Mod en Java con dos eventos, ambos **siempre activos** (no hay comando para apagarlos):
+
+- **Sangre Jurásica**: los dinosaurios te infectan al golpearte, tienes un tiempo para beber
+  el **Antídoto de Ámbar** y, si no lo haces, entras en fase terminal.
+- **Cyberpsychosis**: un reloj de inmunosupresores; si se agota entras en cyberpsychosis y
+  te estabilizas matando (bajas) o con un **Inmunosupresor**.
+
+Son la versión en código de los datapacks `sangre_jurasica` y `ciberpsicosis`.
 
 > Este código está escrito pero **todavía no se ha compilado ni probado en el juego**.
 > Si al compilar sale algún error, pégaselo a Claude y se corrige.
@@ -54,7 +59,6 @@ Sin valor, cada comando muestra el valor actual.
 | `/sj mensajes <true/false>` | Mensajes en el chat |
 | `/sj provocar <true/false>` | Los dinosaurios hostiles atacan de lejos |
 | `/sj radio <bloques>` | Radio de esa provocación (por defecto 20) |
-| `/sj activo <true/false>` | Apaga o enciende todo el sistema |
 | `/sj infectar <jugadores>` | Infecta a los jugadores indicados |
 | `/sj curar <jugadores>` | Cura a los jugadores indicados |
 | `/sj antidoto <jugadores>` | Da el Antídoto de Ámbar |
@@ -63,6 +67,38 @@ Sin valor, cada comando muestra el valor actual.
 
 Los valores se guardan en `config/zxkstudio_sangre_jurasica.json`.
 
+## Comandos de Cyberpsychosis
+
+Requieren ser operador. `/cp` es lo mismo que `/ciberpsicosis`. Los jugadores en creativo,
+espectador o con el tag `cp_inmune` no se ven afectados.
+
+| Comando | Qué hace |
+|---|---|
+| `/inmunosupresores` | Cualquier jugador: ve su tiempo o sus bajas |
+| `/cp estado` | Muestra todos los valores |
+| `/cp entrar <jugadores>` | Mete a los jugadores en cyberpsychosis |
+| `/cp curar <jugadores>` | Los cura y reinicia el reloj |
+| `/cp reiniciar <jugadores>` | Reloj completo, sin inmunidad |
+| `/cp reloj <jugadores> <segundos>` | Fija el reloj (para probar el aviso final) |
+| `/cp modo normal` | Los Inmunosupresores curan la cyberpsychosis |
+| `/cp modo solo_bajas` | NO se puede curar con ítems: solo matando `bajas` entidades |
+| `/cp tiempo <segundos>` | Reloj de inmunosupresores (por defecto 900) |
+| `/cp bajas <n>` | Bajas necesarias (por defecto 6) |
+| `/cp dano <valor>` | Daño de cada pop (por defecto 4.0; `1000` = muerte, como el datapack) |
+| `/cp popmin` / `/cp popmax <segundos>` | Cada cuánto llega el pop (9 a 12) |
+| `/cp bloqueador <segundos>` | Duración de la inmunidad del Bloqueador Neural |
+| `/cp overlays` / `figuras` / `chatfalso` / `sacudidas <true/false>` | Efectos visuales |
+| `/cp dar inmunosupresor <jugadores> [cantidad]` | Da el Inmunosupresor |
+| `/cp dar bloqueador <jugadores> [cantidad]` | Da el Bloqueador Neural |
+| `/cp recargar` / `/cp restablecer` | Relee el archivo / valores por defecto |
+
+Los valores se guardan en `config/zxkstudio_ciberpsicosis.json`.
+
+**Modo solo_bajas:** mientras esté activo, beber un Inmunosupresor o un Bloqueador estando
+en cyberpsychosis no sirve (el ítem no se gasta). Al terminar el evento, `/cp modo normal`
+y vuelven a curar como siempre. El Inmunosupresor se craftea: botella de cristal, 2 lingotes
+de hierro, redstone y lapislázuli (sin forma).
+
 ## Notas
 
 - Morir cura la infección (igual que en el datapack).
@@ -70,4 +106,4 @@ Los valores se guardan en `config/zxkstudio_sangre_jurasica.json`.
   carga, pero lo demás funciona y el antídoto se puede dar con `/sj antidoto`.
 - Los tags de dinosaurios están en `data/zxkstudio/tags/entity_type/sangre_jurasica/`
   y se pueden cambiar con un datapack.
-- No dejes instalado el datapack `sangre_jurasica` original junto con este mod: harían lo mismo dos veces.
+- No dejes instalados los datapacks `sangre_jurasica` ni `ciberpsicosis` originales junto con este mod: harían lo mismo dos veces.

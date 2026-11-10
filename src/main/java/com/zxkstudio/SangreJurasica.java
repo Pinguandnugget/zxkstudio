@@ -48,9 +48,6 @@ public final class SangreJurasica {
 		segundos++;
 
 		SangreConfig cfg = SangreConfig.get();
-		if (!cfg.activo) {
-			return;
-		}
 		for (ServerPlayerEntity jugador : new ArrayList<>(servidor.getPlayerManager().getPlayerList())) {
 			if (jugador.isCreative() || jugador.isSpectator()) {
 				continue;
@@ -69,7 +66,7 @@ public final class SangreJurasica {
 		if (!(entidad instanceof ServerPlayerEntity jugador) || cantidad <= 0.0f) {
 			return true;
 		}
-		if (!SangreConfig.get().activo || jugador.isCreative() || jugador.isSpectator()) {
+		if (jugador.isCreative() || jugador.isSpectator()) {
 			return true;
 		}
 		Entity atacante = fuente.getAttacker();

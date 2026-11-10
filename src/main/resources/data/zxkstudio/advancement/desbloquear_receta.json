@@ -1,0 +1,4 @@
+{
+  "criteria": {"t": {"trigger": "minecraft:tick"}},
+  "rewards": {"recipes": ["zxkstudio:inmunosupresor"]}
+}

@@ -16,8 +16,6 @@ import java.nio.file.Path;
  * y se cambian en el juego con /sangrejurasica (alias /sj).
  */
 public final class SangreConfig {
-	/** Interruptor general: si es false, no hay infecciones ni síntomas. */
-	public boolean activo = true;
 	/** Segundos de la fase 1 (cuenta atrás hasta la fase terminal). */
 	public int tiempoSegundos = 300;
 	/** Daño (en medios corazones) de cada golpe de la fase terminal. 2.0 = 1 corazón. */

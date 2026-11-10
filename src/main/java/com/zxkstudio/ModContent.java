@@ -45,14 +45,28 @@ public final class ModContent {
 	public static final TagKey<EntityType<?>> HOSTILES = TagKey.of(
 			RegistryKeys.ENTITY_TYPE, Identifier.of(ZxkStudio.MOD_ID, "sangre_jurasica/hostiles"));
 
+	/** Estado de Cyberpsychosis del jugador (reloj, bajas, inmunidad). Persiste y se copia al reaparecer. */
+	public static final AttachmentType<CiberEstado> CIBER_ESTADO = AttachmentRegistry.createPersistent(
+			Identifier.of(ZxkStudio.MOD_ID, "ciberpsicosis_estado"),
+			CiberEstado.CODEC
+	);
+
 	public static RegistryEntry<StatusEffect> SANGRE_EFECTO;
+	public static RegistryEntry<StatusEffect> RELOJ_EFECTO;
 	public static Item ANTIDOTO_AMBAR;
+	public static Item INMUNOSUPRESOR;
+	public static Item BLOQUEADOR_NEURAL;
 
 	public static void register() {
 		SANGRE_EFECTO = Registry.registerReference(
 				Registries.STATUS_EFFECT,
 				Identifier.of(ZxkStudio.MOD_ID, "sangre_jurasica"),
 				new SangreJurasicaEffect());
+
+		RELOJ_EFECTO = Registry.registerReference(
+				Registries.STATUS_EFFECT,
+				Identifier.of(ZxkStudio.MOD_ID, "inmunosupresores"),
+				new RelojEffect());
 
 		FoodComponent bebida = new FoodComponent.Builder()
 				.nutrition(0)
@@ -76,7 +90,32 @@ public final class ModContent {
 								Text.translatable("item.zxkstudio.antidoto_ambar").formatted(Formatting.GOLD))
 						.component(DataComponentTypes.LORE, lore)));
 
-		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK)
-				.register(entradas -> entradas.add(ANTIDOTO_AMBAR));
+		INMUNOSUPRESOR = registrarBebidaCiber("inmunosupresor", Formatting.AQUA, false, Rarity.UNCOMMON, bebida);
+		BLOQUEADOR_NEURAL = registrarBebidaCiber("bloqueador_neural", Formatting.LIGHT_PURPLE, true, Rarity.EPIC, bebida);
+
+		ItemGroupEvents.modifyEntriesEvent(ItemGroups.FOOD_AND_DRINK).register(entradas -> {
+			entradas.add(ANTIDOTO_AMBAR);
+			entradas.add(INMUNOSUPRESOR);
+			entradas.add(BLOQUEADOR_NEURAL);
+		});
+	}
+
+	private static Item registrarBebidaCiber(String id, Formatting color, boolean bloqueador, Rarity rareza,
+			FoodComponent bebida) {
+		String base = "item." + ZxkStudio.MOD_ID + "." + id;
+		LoreComponent lore = new LoreComponent(List.of(
+				Text.translatable(base + ".lore1").formatted(Formatting.GRAY, Formatting.ITALIC),
+				Text.translatable(base + ".lore2").formatted(color),
+				Text.translatable(base + ".lore3").formatted(color)));
+		return Registry.register(
+				Registries.ITEM,
+				Identifier.of(ZxkStudio.MOD_ID, id),
+				new InmunosupresorItem(new Item.Settings()
+						.maxCount(64)
+						.rarity(rareza)
+						.food(bebida)
+						.component(DataComponentTypes.ITEM_NAME,
+								Text.translatable(base).formatted(color, Formatting.BOLD))
+						.component(DataComponentTypes.LORE, lore), bloqueador));
 	}
 }

@@ -3,7 +3,7 @@
   "id": "zxkstudio",
   "version": "${version}",
   "name": "zxkstudio",
-  "description": "Contenido de zxkstudio. Incluye Sangre Jurásica: infección por dinosaurios, antídoto de ámbar y comandos para ajustarlo todo.",
+  "description": "Contenido de zxkstudio. Incluye Sangre Jurásica (infección por dinosaurios, antídoto de ámbar) y Cyberpsychosis (inmunosupresores, bajas), con comandos para ajustarlo todo.",
   "authors": ["zxkstudio"],
   "license": "All-Rights-Reserved",
   "environment": "*",

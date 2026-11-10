@@ -11,9 +11,12 @@ public class ZxkStudio implements ModInitializer {
 	@Override
 	public void onInitialize() {
 		SangreConfig.cargar();
+		CiberConfig.cargar();
 		ModContent.register();
 		SangreJurasica.register();
 		SangreCommands.register();
-		LOGGER.info("zxkstudio cargado: Sangre Jurásica lista");
+		CiberPsicosis.register();
+		CiberCommands.register();
+		LOGGER.info("zxkstudio cargado: Sangre Jurásica y Cyberpsychosis listas");
 	}
 }

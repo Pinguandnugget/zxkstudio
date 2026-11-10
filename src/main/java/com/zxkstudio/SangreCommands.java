@@ -55,8 +55,6 @@ public final class SangreCommands {
 					() -> SangreConfig.get().radioProvocar, v -> SangreConfig.get().radioProvocar = v);
 
 			// --- interruptores
-			interruptor(raiz, "activo", "Sangre Jurásica activa",
-					() -> SangreConfig.get().activo, v -> SangreConfig.get().activo = v);
 			interruptor(raiz, "nausea", "Náuseas",
 					() -> SangreConfig.get().nausea, v -> SangreConfig.get().nausea = v);
 			interruptor(raiz, "oscuridad", "Oscuridad",
@@ -194,8 +192,7 @@ public final class SangreCommands {
 	private static void mostrarEstado(ServerCommandSource fuente) {
 		SangreConfig c = SangreConfig.get();
 		String texto = "§4§lSangre Jurásica§r\n"
-				+ "§7activo: §f" + c.activo
-				+ "\n§7tiempo hasta fase terminal: §f" + c.tiempoSegundos + " s"
+				+ "§7tiempo hasta fase terminal: §f" + c.tiempoSegundos + " s"
 				+ "\n§7daño terminal: §f" + c.danoTerminal + " cada " + c.intervaloDanoSegundos + " s"
 				+ "\n§7veneno: §f" + c.nivelVeneno + " §7debilidad: §f" + c.nivelDebilidad
 				+ " §7lentitud: §f" + c.nivelLentitud
