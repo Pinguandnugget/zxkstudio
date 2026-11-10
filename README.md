@@ -96,7 +96,7 @@ Los valores se guardan en `config/zxkstudio_ciberpsicosis.json`.
 
 **Modo solo_bajas:** mientras esté activo, beber un Inmunosupresor o un Bloqueador estando
 en cyberpsychosis no sirve (el ítem no se gasta). Al terminar el evento, `/cp modo normal`
-y vuelven a curar como siempre. El Inmunosupresor se craftea: botella de cristal, 2 lingotes
+y vuelven a curar como siempre. El Inmunosupresor y el Bloqueador se usan como una inyección (sin gesto de beber): clic del inyector, pistón, pinchazo con sacudida de cámara, burbujeo, latido y chispas. El Inmunosupresor se craftea: botella de cristal, 2 lingotes
 de hierro, redstone y lapislázuli (sin forma).
 
 ## Notas

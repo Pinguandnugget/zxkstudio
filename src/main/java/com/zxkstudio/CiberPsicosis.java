@@ -410,6 +410,54 @@ public final class CiberPsicosis {
 		p.sendMessage(msg);
 	}
 
+	// ------------------------------------------------------------------ animación de inyección
+
+	/**
+	 * Secuencia de la inyección (el ítem dura ~32 ticks): clic del inyector, pistón, pinchazo,
+	 * burbujeo del líquido, latido. Todos los cercanos oyen los sonidos; las partículas salen del brazo.
+	 */
+	public static void animacionInyeccion(ServerPlayerEntity p, int restante) {
+		net.minecraft.server.world.ServerWorld mundo = p.getServerWorld();
+		Vec3d brazo = local(p, -0.35, p.getStandingEyeHeight() - 0.35, 0.45);
+		switch (restante) {
+			case 31 -> {
+				fx(mundo, p, SoundEvents.ITEM_CROSSBOW_LOADING_END, 0.9f, 1.5f);
+				fx(mundo, p, SoundEvents.ITEM_ARMOR_EQUIP_IRON, 0.6f, 1.7f);
+			}
+			case 26 -> fx(mundo, p, SoundEvents.BLOCK_PISTON_EXTEND, 0.25f, 2.0f);
+			case 20 -> {
+				fx(mundo, p, SoundEvents.ENTITY_BEE_STING, 0.6f, 1.8f);
+				fx(mundo, p, SoundEvents.ENTITY_PLAYER_ATTACK_CRIT, 0.5f, 1.6f);
+				mundo.spawnParticles(polvo(0.8f, 0.0f, 0.05f, 0.7f), brazo.x, brazo.y, brazo.z, 4, 0.04, 0.04, 0.04, 0.0);
+				p.networkHandler.requestTeleport(p.getX(), p.getY(), p.getZ(), p.getYaw() - 2.5f,
+						MathHelper.clamp(p.getPitch() + 3.0f, -90.0f, 90.0f));
+				overlay(p, 0, CiberConfig.get());
+			}
+			case 18, 15, 12, 9 -> {
+				fx(mundo, p, SoundEvents.BLOCK_BREWING_STAND_BREW, 0.4f, 1.6f);
+				fx(mundo, p, SoundEvents.BLOCK_FIRE_EXTINGUISH, 0.12f, 2.0f);
+				mundo.spawnParticles(polvo(0.3f, 0.9f, 1.0f, 0.8f), brazo.x, brazo.y, brazo.z, 3, 0.05, 0.05, 0.05, 0.0);
+			}
+			case 8 -> {
+				fx(mundo, p, SoundEvents.ENTITY_WARDEN_HEARTBEAT, 1.0f, 1.3f);
+				mundo.spawnParticles(ParticleTypes.ELECTRIC_SPARK, brazo.x, brazo.y, brazo.z, 6, 0.1, 0.1, 0.1, 0.05);
+			}
+			case 4 -> fx(mundo, p, SoundEvents.BLOCK_BEACON_AMBIENT, 0.6f, 2.0f);
+			default -> {
+			}
+		}
+	}
+
+	private static void fx(net.minecraft.server.world.ServerWorld mundo, ServerPlayerEntity p,
+			RegistryEntry<SoundEvent> s, float volumen, float tono) {
+		fx(mundo, p, s.value(), volumen, tono);
+	}
+
+	private static void fx(net.minecraft.server.world.ServerWorld mundo, ServerPlayerEntity p, SoundEvent s,
+			float volumen, float tono) {
+		mundo.playSound(null, p.getX(), p.getY(), p.getZ(), s, SoundCategory.PLAYERS, volumen, tono);
+	}
+
 	// ------------------------------------------------------------------ sustos
 
 	/** Un susto al azar, siempre solo para quien lo sufre. */

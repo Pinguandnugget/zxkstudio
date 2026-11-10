@@ -2,5 +2,11 @@
   "parent": "minecraft:item/generated",
   "textures": {
     "layer0": "zxkstudio:item/bloqueador_neural"
+  },
+  "display": {
+    "firstperson_righthand": {"rotation": [10, -90, 75], "translation": [1.5, 4.5, 1.5], "scale": [0.8, 0.8, 0.8]},
+    "firstperson_lefthand": {"rotation": [10, 90, -75], "translation": [1.5, 4.5, 1.5], "scale": [0.8, 0.8, 0.8]},
+    "thirdperson_righthand": {"rotation": [0, 0, 60], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]},
+    "thirdperson_lefthand": {"rotation": [0, 0, -60], "translation": [0, 3, 1], "scale": [0.55, 0.55, 0.55]}
   }
 }

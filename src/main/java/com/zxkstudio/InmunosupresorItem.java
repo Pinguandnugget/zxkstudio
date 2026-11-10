@@ -4,7 +4,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.util.UseAction;
 import net.minecraft.world.World;
@@ -21,44 +20,37 @@ public class InmunosupresorItem extends Item {
 		this.bloqueador = bloqueador;
 	}
 
+	/** NONE: sin el gesto ni el sonido de beber; la animación la ponen los sonidos y efectos de usageTick. */
 	@Override
 	public UseAction getUseAction(ItemStack stack) {
-		return UseAction.DRINK;
+		return UseAction.NONE;
+	}
+
+	/** Se llama cada tick mientras el jugador "se inyecta". */
+	@Override
+	public void usageTick(World world, LivingEntity user, ItemStack stack, int remainingUseTicks) {
+		if (!world.isClient() && user instanceof ServerPlayerEntity jugador) {
+			CiberPsicosis.animacionInyeccion(jugador, remainingUseTicks);
+		}
 	}
 
 	@Override
 	public ItemStack finishUsing(ItemStack stack, World world, LivingEntity user) {
-		boolean rechazado = false;
+		boolean creativo = user instanceof PlayerEntity p && p.isCreative();
 		if (!world.isClient() && user instanceof ServerPlayerEntity jugador) {
 			if (CiberPsicosis.bloqueaItems(jugador)) {
-				rechazado = true;
 				CiberPsicosis.rechazarItem(jugador);
-			} else if (bloqueador) {
+				return stack; // no se gasta
+			}
+			if (bloqueador) {
 				CiberPsicosis.usarBloqueador(jugador);
 			} else {
 				CiberPsicosis.usarInmunosupresor(jugador);
 			}
 		}
-
-		ItemStack resultado = super.finishUsing(stack, world, user);
-
-		if (user instanceof PlayerEntity jugadorCreativo && jugadorCreativo.isCreative()) {
-			return resultado;
+		if (!creativo) {
+			stack.decrement(1); // la jeringa se gasta; no devuelve botella
 		}
-		if (rechazado) {
-			// no se gasta: se devuelve el ítem que acaba de consumirse
-			if (resultado.isEmpty()) {
-				return new ItemStack(this);
-			}
-			resultado.increment(1);
-			return resultado;
-		}
-		if (resultado.isEmpty()) {
-			return new ItemStack(Items.GLASS_BOTTLE);
-		}
-		if (user instanceof PlayerEntity jugadorNormal) {
-			jugadorNormal.getInventory().insertStack(new ItemStack(Items.GLASS_BOTTLE));
-		}
-		return resultado;
+		return stack;
 	}
 }
