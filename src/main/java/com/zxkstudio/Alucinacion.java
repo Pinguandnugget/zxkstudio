@@ -3,12 +3,16 @@ package com.zxkstudio;
 import net.fabricmc.fabric.api.event.player.AttackBlockCallback;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayConnectionEvents;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.attribute.EntityAttributeInstance;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.effect.StatusEffects;
-import net.minecraft.network.packet.s2c.play.BlockUpdateS2CPacket;
+import net.minecraft.network.packet.s2c.play.ChunkDataS2CPacket;
+import net.minecraft.network.packet.s2c.play.EntityAttributesS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitiesDestroyS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntityPositionS2CPacket;
 import net.minecraft.network.packet.s2c.play.EntitySetHeadYawS2CPacket;
@@ -16,18 +20,25 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.network.packet.s2c.play.GameStateChangeS2CPacket;
 import net.minecraft.network.packet.s2c.play.StopSoundS2CPacket;
 import net.minecraft.network.packet.s2c.play.WorldTimeUpdateS2CPacket;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.Heightmap;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.chunk.PalettedContainer;
+import net.minecraft.world.chunk.WorldChunk;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -45,6 +56,8 @@ import java.util.UUID;
  * (bloques, hora, clima, sonidos y figuras falsas que SOLO ve él), pasa un susto y vuelve
  * a la realidad todavía en cyberpsychosis. Todo se envía como paquetes: el mundo real no cambia.
  *
+ * El paisaje falso se envía como chunks modificados (bloques y bioma) en toda la distancia
+ * de render cercana, así cambian también el cielo, la niebla, el color de la hierba y la nieve.
  * Los bloques falsos tienen siempre la misma colisión que los reales (cubo por cubo),
  * así el jugador no se atasca ni rebota.
  */
@@ -56,8 +69,20 @@ public final class Alucinacion {
 		PLAYA, NIEVE
 	}
 
-	private static final int RADIO = 14;
-	private static final int COLUMNAS_POR_TICK = 90;
+	/** Radio máximo, en chunks, del paisaje falso (se limita a la distancia de render del servidor). */
+	private static final int RADIO_CHUNKS = 7;
+	private static final int CHUNKS_POR_TICK = 6;
+
+	public enum Bicho {
+		AHOGADO, WARDEN, SOMBRA
+	}
+
+	private static final Set<Block> TIERRA = Set.of(Blocks.GRASS_BLOCK, Blocks.DIRT, Blocks.COARSE_DIRT,
+			Blocks.PODZOL, Blocks.MYCELIUM, Blocks.ROOTED_DIRT, Blocks.MOSS_BLOCK, Blocks.CLAY, Blocks.GRAVEL,
+			Blocks.MUD, Blocks.SNOW_BLOCK);
+	private static final Set<Block> PIEDRA = Set.of(Blocks.STONE, Blocks.ANDESITE, Blocks.DIORITE,
+			Blocks.GRANITE, Blocks.TUFF);
+	private static final Set<Block> ARENA = Set.of(Blocks.SAND, Blocks.RED_SAND, Blocks.SANDSTONE);
 	private static final Random RNG = new Random();
 
 	private static final int F_ENTRADA = 0;
@@ -77,9 +102,10 @@ public final class Alucinacion {
 		int centroX;
 		int centroZ;
 		final Set<Long> hechas = new HashSet<>();
-		final ArrayDeque<int[]> cola = new ArrayDeque<>();
-		final List<BlockPos> modificados = new ArrayList<>();
+		final ArrayDeque<ChunkPos> cola = new ArrayDeque<>();
+		final List<ChunkPos> enviados = new ArrayList<>();
 		Entity figura;
+		Bicho bicho;
 		boolean restaurado = false;
 
 		Escena(Tipo tipo, ServerWorld mundo) {
@@ -181,12 +207,17 @@ public final class Alucinacion {
 
 	private static void entrada(ServerPlayerEntity p, Escena es) {
 		if (es.tf == 1) {
-			CiberPsicosis.efecto(p, StatusEffects.BLINDNESS, 30, 0);
+			// se van los efectos de la cyberpsychosis mientras dura la alucinación (siguen en cyberpsychosis)
+			p.removeStatusEffect(StatusEffects.NAUSEA);
+			p.removeStatusEffect(StatusEffects.DARKNESS);
+			p.removeStatusEffect(StatusEffects.STRENGTH);
+			p.removeStatusEffect(StatusEffects.SPEED);
+			CiberPsicosis.efecto(p, StatusEffects.BLINDNESS, 40, 0);
 			CiberPsicosis.sonido(p, SoundEvents.AMBIENT_CAVE, SoundCategory.MASTER, 1.5f, 0.5f);
 			CiberPsicosis.sonido(p, SoundEvents.BLOCK_BEACON_DEACTIVATE, SoundCategory.MASTER, 1.0f, 0.5f);
-			es.centroX = p.getBlockX();
-			es.centroZ = p.getBlockZ();
-			encolar(es, es.centroX, es.centroZ);
+			es.centroX = p.getChunkPos().x;
+			es.centroZ = p.getChunkPos().z;
+			encolar(p, es);
 		}
 		procesarCola(p, es);
 		if (es.tf == 5) {
@@ -203,15 +234,11 @@ public final class Alucinacion {
 		procesarCola(p, es);
 		if (es.tf % 10 == 0) {
 			enviarTiempo(p, es);
-			if (Math.abs(p.getBlockX() - es.centroX) > 5 || Math.abs(p.getBlockZ() - es.centroZ) > 5) {
-				es.centroX = p.getBlockX();
-				es.centroZ = p.getBlockZ();
-				encolar(es, es.centroX, es.centroZ);
+			if (p.getChunkPos().x != es.centroX || p.getChunkPos().z != es.centroZ) {
+				es.centroX = p.getChunkPos().x;
+				es.centroZ = p.getChunkPos().z;
+				encolar(p, es);
 			}
-		}
-		if (es.tipo == Tipo.NIEVE && es.tf % 2 == 0) {
-			CiberPsicosis.part(p, ParticleTypes.SNOWFLAKE, p.getX(), p.getY() + 3.0, p.getZ(),
-					7.0, 3.0, 7.0, 0.02, 25);
 		}
 		sonidos(p, es);
 
@@ -274,7 +301,7 @@ public final class Alucinacion {
 			double len = Math.max(0.0001, Math.hypot(dir.x, dir.z));
 			double fx = p.getX() + dir.x / len * 2.2;
 			double fz = p.getZ() + dir.z / len * 2.2;
-			Double suelo = suelo(es.mundo, fx, fz);
+			Double suelo = alturaSuelo(es.mundo, fx, fz);
 			double fy = suelo != null ? suelo : p.getY();
 			moverFigura(p, es, fx, fy, fz);
 			CiberPsicosis.sonido(p, SoundEvents.ENTITY_ELDER_GUARDIAN_CURSE, SoundCategory.MASTER, 1.0f, 0.7f);
@@ -321,74 +348,156 @@ public final class Alucinacion {
 
 	// ------------------------------------------------------------------ mundo falso
 
-	private static void encolar(Escena es, int cx, int cz) {
+	/** Pone en cola los chunks cercanos que todavía no se han falseado. */
+	private static void encolar(ServerPlayerEntity p, Escena es) {
+		int vista = p.getServer() != null ? p.getServer().getPlayerManager().getViewDistance() : RADIO_CHUNKS;
+		int r = Math.max(2, Math.min(RADIO_CHUNKS, vista));
 		List<int[]> nuevas = new ArrayList<>();
-		for (int dx = -RADIO; dx <= RADIO; dx++) {
-			for (int dz = -RADIO; dz <= RADIO; dz++) {
+		for (int dx = -r; dx <= r; dx++) {
+			for (int dz = -r; dz <= r; dz++) {
 				int d2 = dx * dx + dz * dz;
-				if (d2 > RADIO * RADIO) {
+				if (d2 > r * r) {
 					continue;
 				}
-				long clave = ((long) (cx + dx) << 32) ^ ((cz + dz) & 0xffffffffL);
-				if (es.hechas.add(clave)) {
-					nuevas.add(new int[]{cx + dx, cz + dz, d2});
+				ChunkPos cp = new ChunkPos(es.centroX + dx, es.centroZ + dz);
+				if (es.hechas.add(cp.toLong())) {
+					nuevas.add(new int[]{cp.x, cp.z, d2});
 				}
 			}
 		}
 		nuevas.sort(Comparator.comparingInt(a -> a[2]));
-		es.cola.addAll(nuevas);
+		for (int[] c : nuevas) {
+			es.cola.add(new ChunkPos(c[0], c[1]));
+		}
 	}
 
 	private static void procesarCola(ServerPlayerEntity p, Escena es) {
-		for (int i = 0; i < COLUMNAS_POR_TICK && !es.cola.isEmpty(); i++) {
-			int[] c = es.cola.poll();
-			columna(p, es, c[0], c[1]);
+		try {
+			for (int i = 0; i < CHUNKS_POR_TICK && !es.cola.isEmpty(); i++) {
+				ChunkPos cp = es.cola.poll();
+				WorldChunk real = es.mundo.getChunkManager().getWorldChunk(cp.x, cp.z);
+				if (real == null) {
+					es.hechas.remove(cp.toLong()); // aún no cargado: se reintenta luego
+					continue;
+				}
+				enviarChunkFalso(p, es, real);
+				es.enviados.add(cp);
+			}
+		} catch (Exception e) {
+			ZxkStudio.LOGGER.error("Falló el paisaje falso de la alucinación; se cancela", e);
+			es.cola.clear();
+			es.fase = F_SALIDA;
+			es.tf = 0;
 		}
 	}
 
-	/** Cambia la superficie (y un par de capas) de una columna por bloques del mismo tamaño. */
-	private static void columna(ServerPlayerEntity p, Escena es, int x, int z) {
+	/**
+	 * Copia el chunk real, cambia la superficie (y los cantos de los acantilados) por bloques del
+	 * mismo tamaño y le pone el bioma de playa o de montaña helada. Solo se envía a este jugador.
+	 */
+	private static void enviarChunkFalso(ServerPlayerEntity p, Escena es, WorldChunk real) {
 		ServerWorld w = es.mundo;
-		if (!w.isChunkLoaded(x >> 4, z >> 4)) {
-			return;
-		}
-		int y = w.getTopY(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z) - 1;
-		if (y < w.getBottomY()) {
-			return;
-		}
-		BlockPos sup = new BlockPos(x, y, z);
-		if (!cuboSolido(w, sup)) {
-			return;
-		}
+		Registry<Biome> registro = w.getRegistryManager().get(RegistryKeys.BIOME);
+		RegistryEntry<Biome> bioma = registro.entryOf(es.tipo == Tipo.PLAYA ? BiomeKeys.BEACH : BiomeKeys.FROZEN_PEAKS);
 		boolean nieve = es.tipo == Tipo.NIEVE;
-		poner(p, es, sup, nieve ? Blocks.SNOW_BLOCK.getDefaultState() : Blocks.SAND.getDefaultState());
-		BlockPos b1 = sup.down();
-		if (cuboSolido(w, b1)) {
-			poner(p, es, b1, nieve ? Blocks.SNOW_BLOCK.getDefaultState() : Blocks.SAND.getDefaultState());
-			BlockPos b2 = b1.down();
-			if (!nieve && cuboSolido(w, b2)) {
-				poner(p, es, b2, Blocks.SANDSTONE.getDefaultState());
+
+		WorldChunk falso = new WorldChunk(w, real.getPos());
+		ChunkSection[] origen = real.getSectionArray();
+		ChunkSection[] destino = falso.getSectionArray();
+		int secciones = Math.min(origen.length, destino.length);
+
+		int[][] cima = new int[16][16];
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				cima[x][z] = real.sampleHeightmap(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, x, z);
 			}
 		}
-		BlockPos arriba = sup.up();
-		BlockState sa = w.getBlockState(arriba);
-		if (sa.isAir()) {
-			if (nieve) {
-				poner(p, es, arriba, Blocks.SNOW.getDefaultState()); // capa fina: sin colisión
+		int[][] bajo = new int[16][16];
+		for (int x = 0; x < 16; x++) {
+			for (int z = 0; z < 16; z++) {
+				int m = cima[x][z];
+				if (x > 0) {
+					m = Math.min(m, cima[x - 1][z]);
+				}
+				if (x < 15) {
+					m = Math.min(m, cima[x + 1][z]);
+				}
+				if (z > 0) {
+					m = Math.min(m, cima[x][z - 1]);
+				}
+				if (z < 15) {
+					m = Math.min(m, cima[x][z + 1]);
+				}
+				bajo[x][z] = Math.min(m - 1, cima[x][z] - 3);
 			}
-		} else if (sa.isReplaceable() && sa.getFluidState().isEmpty()) {
-			poner(p, es, arriba, nieve ? Blocks.SNOW.getDefaultState() : Blocks.AIR.getDefaultState());
 		}
+		boolean[][] cambiado = new boolean[16][16];
+		int base = w.getBottomY();
+		for (int i = 0; i < secciones; i++) {
+			ChunkSection s = origen[i];
+			ChunkSection d = new ChunkSection(s.getBlockStateContainer().copy(),
+					new PalettedContainer<>(registro.getIndexedEntries(), bioma,
+							PalettedContainer.PaletteProvider.BIOME));
+			destino[i] = d;
+			int y0 = base + i * 16;
+			for (int x = 0; x < 16; x++) {
+				for (int z = 0; z < 16; z++) {
+					int ymin = Math.max(bajo[x][z], y0);
+					int ymax = Math.min(cima[x][z] + 1, y0 + 15);
+					for (int y = ymin; y <= ymax; y++) {
+						BlockState viejo = s.getBlockState(x, y - y0, z);
+						BlockState nuevo;
+						if (y == cima[x][z] + 1) {
+							nuevo = cambiado[x][z] ? encima(viejo, nieve) : null;
+						} else {
+							nuevo = suelo(viejo, nieve, y, cima[x][z]);
+							if (y == cima[x][z] && nuevo != null) {
+								cambiado[x][z] = true;
+							}
+						}
+						if (nuevo != null) {
+							d.setBlockState(x, y - y0, z, nuevo, false);
+						}
+					}
+				}
+			}
+		}
+		p.networkHandler.sendPacket(new ChunkDataS2CPacket(falso, w.getLightingProvider(), null, null));
 	}
 
-	private static boolean cuboSolido(ServerWorld w, BlockPos pos) {
-		BlockState s = w.getBlockState(pos);
-		return s.getFluidState().isEmpty() && s.isFullCube(w, pos);
+	/** Bloque del suelo falso (mismo tamaño que el real) o null si se queda igual. */
+	private static BlockState suelo(BlockState s, boolean nieve, int y, int cima) {
+		if (!s.getFluidState().isEmpty()) {
+			return null;
+		}
+		Block b = s.getBlock();
+		if (nieve) {
+			if (TIERRA.contains(b) || ARENA.contains(b)) {
+				return Blocks.SNOW_BLOCK.getDefaultState();
+			}
+			if (PIEDRA.contains(b) && y >= cima - 1) {
+				return Blocks.SNOW_BLOCK.getDefaultState();
+			}
+			return null;
+		}
+		if (TIERRA.contains(b)) {
+			return Blocks.SAND.getDefaultState();
+		}
+		if (PIEDRA.contains(b)) {
+			return Blocks.SANDSTONE.getDefaultState();
+		}
+		return null;
 	}
 
-	private static void poner(ServerPlayerEntity p, Escena es, BlockPos pos, BlockState estado) {
-		p.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, estado));
-		es.modificados.add(pos.toImmutable());
+	/** Lo que hay justo encima del suelo: hierbas fuera en la playa, una capa fina de nieve en la nieve. */
+	private static BlockState encima(BlockState s, boolean nieve) {
+		if (s.isAir()) {
+			return nieve ? Blocks.SNOW.getDefaultState() : null; // capa fina: sin colisión
+		}
+		if (s.isReplaceable() && s.getFluidState().isEmpty()) {
+			return nieve ? Blocks.SNOW.getDefaultState() : Blocks.AIR.getDefaultState();
+		}
+		return null;
 	}
 
 	/** Reenvía el mundo real, la hora y el clima. */
@@ -398,10 +507,13 @@ public final class Alucinacion {
 		}
 		es.restaurado = true;
 		ServerWorld w = es.mundo;
-		for (BlockPos pos : es.modificados) {
-			p.networkHandler.sendPacket(new BlockUpdateS2CPacket(pos, w.getBlockState(pos)));
+		for (ChunkPos cp : es.enviados) {
+			WorldChunk real = w.getChunkManager().getWorldChunk(cp.x, cp.z);
+			if (real != null) {
+				p.networkHandler.sendPacket(new ChunkDataS2CPacket(real, w.getLightingProvider(), null, null));
+			}
 		}
-		es.modificados.clear();
+		es.enviados.clear();
 		es.cola.clear();
 		p.networkHandler.sendPacket(new WorldTimeUpdateS2CPacket(w.getTime(), w.getTimeOfDay(),
 				w.getGameRules().getBoolean(GameRules.DO_DAYLIGHT_CYCLE)));
@@ -418,13 +530,15 @@ public final class Alucinacion {
 	}
 
 	private static void enviarClima(ServerPlayerEntity p, Escena es) {
-		p.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, 0.0f));
+		// en el bioma helado falso, la "lluvia" se ve como una ventisca de nieve
+		float lluvia = es.tipo == Tipo.NIEVE ? 1.0f : 0.0f;
+		p.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.RAIN_GRADIENT_CHANGED, lluvia));
 		p.networkHandler.sendPacket(new GameStateChangeS2CPacket(GameStateChangeS2CPacket.THUNDER_GRADIENT_CHANGED, 0.0f));
 	}
 
 	// ------------------------------------------------------------------ figura falsa
 
-	private static Double suelo(ServerWorld w, double x, double z) {
+	private static Double alturaSuelo(ServerWorld w, double x, double z) {
 		int bx = MathHelper.floor(x);
 		int bz = MathHelper.floor(z);
 		if (!w.isChunkLoaded(bx >> 4, bz >> 4)) {
@@ -437,25 +551,39 @@ public final class Alucinacion {
 		return Math.hypot(figura.getX() - p.getX(), figura.getZ() - p.getZ());
 	}
 
-	/** Una figura que solo ve este jugador: Enderman en la nieve, Ahogado en la playa. */
+	/** Una figura que solo ve este jugador: Ahogado, Warden o la Sombra (negra y alta). */
 	private static void crearFigura(ServerPlayerEntity p, Escena es) {
 		double ang = Math.toRadians(p.getYaw() + RNG.nextInt(101) - 50);
-		double fx = p.getX() - Math.sin(ang) * 20.0;
-		double fz = p.getZ() + Math.cos(ang) * 20.0;
-		Double fy = suelo(es.mundo, fx, fz);
+		double fx = p.getX() - Math.sin(ang) * 22.0;
+		double fz = p.getZ() + Math.cos(ang) * 22.0;
+		Double fy = alturaSuelo(es.mundo, fx, fz);
 		if (fy == null) {
 			return;
 		}
-		Entity figura = es.tipo == Tipo.NIEVE
-				? EntityType.ENDERMAN.create(es.mundo)
-				: EntityType.DROWNED.create(es.mundo);
+		Bicho bicho = es.tipo == Tipo.NIEVE
+				? (RNG.nextBoolean() ? Bicho.WARDEN : Bicho.SOMBRA)
+				: (RNG.nextBoolean() ? Bicho.AHOGADO : Bicho.SOMBRA);
+		Entity figura = switch (bicho) {
+			case AHOGADO -> EntityType.DROWNED.create(es.mundo);
+			case WARDEN -> EntityType.WARDEN.create(es.mundo);
+			// la "Sombra" es un Illusioner (no sale en el juego normal) con piel negra propia del mod
+			default -> EntityType.ILLUSIONER.create(es.mundo);
+		};
 		if (figura == null) {
 			return;
 		}
+		es.bicho = bicho;
 		es.figura = figura; // no se añade al mundo: solo se usa para tener un id y mandar paquetes
 		figura.refreshPositionAndAngles(fx, fy, fz, miradaHacia(p, fx, fz), 0.0f);
 		p.networkHandler.sendPacket(new EntitySpawnS2CPacket(figura.getId(), figura.getUuid(), fx, fy, fz,
 				0.0f, figura.getYaw(), figura.getType(), 0, Vec3d.ZERO, figura.getYaw()));
+		if (bicho == Bicho.SOMBRA) {
+			// más alto de lo normal
+			EntityAttributeInstance escala = new EntityAttributeInstance(EntityAttributes.GENERIC_SCALE, inst -> {
+			});
+			escala.setBaseValue(1.7);
+			p.networkHandler.sendPacket(new EntityAttributesS2CPacket(figura.getId(), List.of(escala)));
+		}
 		enviarPose(p, figura);
 	}
 
@@ -478,7 +606,7 @@ public final class Alucinacion {
 		double paso = 1.3;
 		double nx = f.getX() + dx / d * paso;
 		double nz = f.getZ() + dz / d * paso;
-		Double ny = suelo(es.mundo, nx, nz);
+		Double ny = alturaSuelo(es.mundo, nx, nz);
 		moverFigura(p, es, nx, ny != null ? ny : f.getY(), nz);
 	}
 

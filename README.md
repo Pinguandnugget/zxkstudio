@@ -105,11 +105,16 @@ de hierro, redstone y lapislázuli (sin forma).
 
 ## Alucinaciones
 
-En cyberpsychosis el jugador "viaja" de vez en cuando a una **playa** o a una **montaña nevada**:
-bloques, hora, clima, sonidos y una figura (Ahogado o Enderman) que solo ve él. La figura se
-acerca cuando no la mira, y al final hay un susto (sin daño). Luego despierta en el mismo
-sitio, aún en cyberpsychosis. El mundo real no cambia. Durante la escena no puede romper ni
-colocar bloques. Si lo curas, la escena termina al instante.
+En cyberpsychosis el jugador "viaja" de vez en cuando a una **playa** o a una **montaña nevada**.
+Se le envían chunks modificados solo a él (hasta ~7 chunks a la redonda): suelo de arena o de nieve,
+bioma de playa o helado (cielo, niebla, hierba), hora, ventisca y sonidos. El mundo real no cambia.
+
+- Al empezar la escena se quitan los efectos de la cyberpsychosis (náuseas, oscuridad, fuerza,
+  velocidad) y no hay pops; siguen en cyberpsychosis. Al despertar vuelven todos los efectos.
+- Una figura que solo ve él se acerca cuando no la mira: **Ahogado** (playa), **Warden** (nieve)
+  o la **Sombra** (un Illusioner con piel negra y ojos rojos, más alto; la piel está en
+  `assets/minecraft/textures/entity/illager/illusioner.png`). Al final, un susto sin daño.
+- Durante la escena no puede romper ni colocar bloques. Si lo curas, termina al instante.
 
 ## Notas
 

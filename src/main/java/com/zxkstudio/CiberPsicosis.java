@@ -253,12 +253,12 @@ public final class CiberPsicosis {
 	}
 
 	private static void psicosisFx(ServerPlayerEntity p, CiberEstado e, CiberConfig cfg) {
+		if (Alucinacion.enEscena(p)) {
+			return; // en la alucinación no hay pops ni efectos: vuelven al despertar
+		}
 		e.pop--;
 		if (e.pop <= 0) {
 			pop(p, e, cfg);
-		}
-		if (Alucinacion.enEscena(p)) {
-			return; // durante la alucinación mandan sus propios sonidos y sustos
 		}
 		int m20 = e.pt % 20;
 		if (m20 == 0) {
