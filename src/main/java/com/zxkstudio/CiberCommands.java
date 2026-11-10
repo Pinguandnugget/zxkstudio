@@ -142,6 +142,24 @@ public final class CiberCommands {
 			interruptor(raiz, "sacudidas", "Sacudidas de cámara",
 					() -> CiberConfig.get().sacudidas, v -> CiberConfig.get().sacudidas = v);
 
+			// --- alucinaciones (playa / nieve)
+			interruptor(raiz, "alucinaciones", "Alucinaciones de playa y nieve",
+					() -> CiberConfig.get().alucinaciones, v -> CiberConfig.get().alucinaciones = v);
+			entero(raiz, "alucinacion", "Segundos de cada alucinación antes del susto", 10, 300,
+					() -> CiberConfig.get().alucinacionSegundos, v -> CiberConfig.get().alucinacionSegundos = v);
+			entero(raiz, "esperamin", "Segundos mínimos entre alucinaciones", 5, 3600,
+					() -> CiberConfig.get().alucinacionEsperaMin, v -> CiberConfig.get().alucinacionEsperaMin = v);
+			entero(raiz, "esperamax", "Segundos máximos entre alucinaciones", 5, 3600,
+					() -> CiberConfig.get().alucinacionEsperaMax, v -> CiberConfig.get().alucinacionEsperaMax = v);
+			raiz.then(CommandManager.literal("alucinar")
+					.then(CommandManager.argument("jugadores", EntityArgumentType.players())
+							.then(CommandManager.literal("playa").executes(ctx ->
+									alucinar(ctx.getSource(), EntityArgumentType.getPlayers(ctx, "jugadores"),
+											Alucinacion.Tipo.PLAYA)))
+							.then(CommandManager.literal("nieve").executes(ctx ->
+									alucinar(ctx.getSource(), EntityArgumentType.getPlayers(ctx, "jugadores"),
+											Alucinacion.Tipo.NIEVE)))));
+
 			// --- configuración
 			raiz.then(CommandManager.literal("recargar").executes(ctx -> {
 				CiberConfig.cargar();
@@ -187,6 +205,21 @@ public final class CiberCommands {
 				(inmunosupresor ? "Inmunosupresor" : "Bloqueador Neural") + " x" + cantidad
 						+ " entregado a " + lista.size() + " jugador(es)"), true);
 		return lista.size();
+	}
+
+	/** Fuerza una alucinación (el jugador debe estar en cyberpsychosis para que dure). */
+	private static int alucinar(ServerCommandSource fuente, Collection<ServerPlayerEntity> lista,
+			Alucinacion.Tipo tipo) {
+		int n = 0;
+		for (ServerPlayerEntity p : lista) {
+			if (Alucinacion.iniciar(p, tipo)) {
+				n++;
+			}
+		}
+		int total = n;
+		fuente.sendFeedback(() -> Text.literal("Alucinación de " + tipo.name().toLowerCase() + ": " + total
+				+ " jugador(es). Solo dura si están en cyberpsychosis (/cp entrar)."), true);
+		return total;
 	}
 
 	private static String nombreModo(boolean soloBajas) {
@@ -263,6 +296,8 @@ public final class CiberCommands {
 				+ "\n§7reloj: §f" + c.tiempoSegundos + " s §7bajas: §f" + c.bajasNecesarias
 				+ "\n§7daño pop: §f" + c.danoPop + " cada " + c.popMinSegundos + "-" + c.popMaxSegundos + " s"
 				+ "\n§7bloqueador: §f" + c.bloqueadorSegundos + " s"
+				+ "\n§7alucinaciones: §f" + c.alucinaciones + " §7duración: §f" + c.alucinacionSegundos
+				+ " s §7espera: §f" + c.alucinacionEsperaMin + "-" + c.alucinacionEsperaMax + " s"
 				+ "\n§7overlays: §f" + c.overlays + " §7figuras: §f" + c.figuras
 				+ " §7chat falso: §f" + c.chatFalso + " §7sacudidas: §f" + c.sacudidas;
 		fuente.sendFeedback(() -> Text.literal(texto), false);

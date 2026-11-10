@@ -94,6 +94,7 @@ public final class CiberPsicosis {
 	private static void alTick(MinecraftServer servidor) {
 		CiberConfig cfg = CiberConfig.get();
 		for (ServerPlayerEntity jugador : new ArrayList<>(servidor.getPlayerManager().getPlayerList())) {
+			boolean enPsicosis = false;
 			if (!jugador.isCreative() && !jugador.isSpectator()
 					&& !jugador.getCommandTags().contains("cp_inmune")) {
 				CiberEstado e = estado(jugador);
@@ -105,7 +106,9 @@ public final class CiberPsicosis {
 					psicosis(jugador, e, cfg);
 				}
 				jugador.setAttached(ModContent.CIBER_ESTADO, e);
+				enPsicosis = e.est == 1;
 			}
+			Alucinacion.tick(jugador, enPsicosis);
 			dibujarFiguras(jugador);
 		}
 	}
@@ -127,6 +130,7 @@ public final class CiberPsicosis {
 
 	/** Al morir: pierde la cyberpsychosis y el reloj vuelve a empezar con 30 s de regalo. */
 	private static void alCopiarJugador(ServerPlayerEntity viejo, ServerPlayerEntity nuevo, boolean vivo) {
+		Alucinacion.olvidar(viejo.getUuid());
 		CiberEstado anterior = viejo.getAttached(ModContent.CIBER_ESTADO);
 		if (anterior == null) {
 			return;
@@ -253,6 +257,9 @@ public final class CiberPsicosis {
 		if (e.pop <= 0) {
 			pop(p, e, cfg);
 		}
+		if (Alucinacion.enEscena(p)) {
+			return; // durante la alucinación mandan sus propios sonidos y sustos
+		}
 		int m20 = e.pt % 20;
 		if (m20 == 0) {
 			sonido(p, SoundEvents.ENTITY_WARDEN_HEARTBEAT, SoundCategory.MASTER, 2.0f, 1.3f);
@@ -283,7 +290,7 @@ public final class CiberPsicosis {
 		e.pop = min + RNG.nextInt(max - min + 1);
 	}
 
-	private static void aplicarEfectos(ServerPlayerEntity p) {
+	static void aplicarEfectos(ServerPlayerEntity p) {
 		efecto(p, StatusEffects.NAUSEA, 240, 0);
 		efecto(p, StatusEffects.STRENGTH, 240, 0);
 		efecto(p, StatusEffects.SPEED, 240, 0);
@@ -499,7 +506,7 @@ public final class CiberPsicosis {
 	}
 
 	/** Pantallazo de glitch (una de 4 imágenes); base 0 = leves, 4 = fuertes. */
-	private static void overlay(ServerPlayerEntity p, int base, CiberConfig cfg) {
+	static void overlay(ServerPlayerEntity p, int base, CiberConfig cfg) {
 		if (!cfg.overlays) {
 			return;
 		}
@@ -575,7 +582,7 @@ public final class CiberPsicosis {
 	}
 
 	/** Partículas que solo ve el jugador indicado. */
-	private static void part(ServerPlayerEntity p, ParticleEffect efecto, double x, double y, double z,
+	static void part(ServerPlayerEntity p, ParticleEffect efecto, double x, double y, double z,
 			double dx, double dy, double dz, double velocidad, int cantidad) {
 		p.networkHandler.sendPacket(new ParticleS2CPacket(efecto, true, x, y, z,
 				(float) dx, (float) dy, (float) dz, (float) velocidad, cantidad));
@@ -584,7 +591,7 @@ public final class CiberPsicosis {
 	// ------------------------------------------------------------------ utilidades
 
 	/** Como las coordenadas locales ^izquierda ^arriba ^adelante de los comandos (sin cabeceo). */
-	private static Vec3d local(ServerPlayerEntity p, double izquierda, double arriba, double adelante) {
+	static Vec3d local(ServerPlayerEntity p, double izquierda, double arriba, double adelante) {
 		double yaw = Math.toRadians(p.getYaw());
 		double fx = -Math.sin(yaw);
 		double fz = Math.cos(yaw);
@@ -604,7 +611,7 @@ public final class CiberPsicosis {
 		p.addStatusEffect(new StatusEffectInstance(ModContent.RELOJ_EFECTO, duracion, 0, false, false, true));
 	}
 
-	private static void efecto(ServerPlayerEntity p, RegistryEntry<StatusEffect> tipo, int ticks, int nivel) {
+	static void efecto(ServerPlayerEntity p, RegistryEntry<StatusEffect> tipo, int ticks, int nivel) {
 		p.addStatusEffect(new StatusEffectInstance(tipo, ticks, nivel, false, false, false));
 	}
 
@@ -629,21 +636,21 @@ public final class CiberPsicosis {
 
 	// sonidos que solo oye el jugador (como "playsound ... @s")
 
-	private static void sonido(ServerPlayerEntity p, SoundEvent s, SoundCategory c, float volumen, float tono) {
+	static void sonido(ServerPlayerEntity p, SoundEvent s, SoundCategory c, float volumen, float tono) {
 		sonido(p, Registries.SOUND_EVENT.getEntry(s), c, p.getPos(), volumen, tono);
 	}
 
-	private static void sonido(ServerPlayerEntity p, RegistryEntry<SoundEvent> s, SoundCategory c, float volumen,
+	static void sonido(ServerPlayerEntity p, RegistryEntry<SoundEvent> s, SoundCategory c, float volumen,
 			float tono) {
 		sonido(p, s, c, p.getPos(), volumen, tono);
 	}
 
-	private static void sonido(ServerPlayerEntity p, SoundEvent s, SoundCategory c, Vec3d pos, float volumen,
+	static void sonido(ServerPlayerEntity p, SoundEvent s, SoundCategory c, Vec3d pos, float volumen,
 			float tono) {
 		sonido(p, Registries.SOUND_EVENT.getEntry(s), c, pos, volumen, tono);
 	}
 
-	private static void sonido(ServerPlayerEntity p, RegistryEntry<SoundEvent> s, SoundCategory c, Vec3d pos,
+	static void sonido(ServerPlayerEntity p, RegistryEntry<SoundEvent> s, SoundCategory c, Vec3d pos,
 			float volumen, float tono) {
 		p.networkHandler.sendPacket(new PlaySoundS2CPacket(s, c, pos.x, pos.y, pos.z, volumen, tono, RNG.nextLong()));
 	}

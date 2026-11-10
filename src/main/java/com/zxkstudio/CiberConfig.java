@@ -38,6 +38,13 @@ public final class CiberConfig {
 	public boolean figuras = true;
 	public boolean chatFalso = true;
 	public boolean sacudidas = true;
+	/** Alucinaciones de playa y nieve durante la cyberpsychosis. */
+	public boolean alucinaciones = true;
+	/** Duración de cada alucinación antes del susto final. */
+	public int alucinacionSegundos = 30;
+	/** Espera entre alucinaciones (al azar entre min y max), contada dentro de la cyberpsychosis. */
+	public int alucinacionEsperaMin = 45;
+	public int alucinacionEsperaMax = 120;
 
 	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
 	private static CiberConfig instancia = new CiberConfig();
@@ -95,6 +102,9 @@ public final class CiberConfig {
 		popMinSegundos = limitar(popMinSegundos, 1, 600);
 		popMaxSegundos = limitar(popMaxSegundos, popMinSegundos, 600);
 		bloqueadorSegundos = limitar(bloqueadorSegundos, 10, 86400);
+		alucinacionSegundos = limitar(alucinacionSegundos, 10, 300);
+		alucinacionEsperaMin = limitar(alucinacionEsperaMin, 5, 3600);
+		alucinacionEsperaMax = limitar(alucinacionEsperaMax, alucinacionEsperaMin, 3600);
 	}
 
 	private static int limitar(int valor, int min, int max) {

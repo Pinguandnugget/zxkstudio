@@ -16,6 +16,7 @@ public class ZxkStudio implements ModInitializer {
 		SangreJurasica.register();
 		SangreCommands.register();
 		CiberPsicosis.register();
+		Alucinacion.register();
 		CiberCommands.register();
 		LOGGER.info("zxkstudio cargado: Sangre Jurásica y Cyberpsychosis listas");
 	}

@@ -88,6 +88,10 @@ espectador o con el tag `cp_inmune` no se ven afectados.
 | `/cp popmin` / `/cp popmax <segundos>` | Cada cuánto llega el pop (9 a 12) |
 | `/cp bloqueador <segundos>` | Duración de la inmunidad del Bloqueador Neural |
 | `/cp overlays` / `figuras` / `chatfalso` / `sacudidas <true/false>` | Efectos visuales |
+| `/cp alucinaciones <true/false>` | Alucinaciones de playa y nieve en cyberpsychosis |
+| `/cp alucinar <jugadores> playa\|nieve` | Fuerza una alucinación (el jugador debe estar en cyberpsychosis) |
+| `/cp alucinacion <segundos>` | Duración antes del susto (por defecto 30) |
+| `/cp esperamin` / `/cp esperamax <segundos>` | Espera entre alucinaciones (45 a 120) |
 | `/cp dar inmunosupresor <jugadores> [cantidad]` | Da el Inmunosupresor |
 | `/cp dar bloqueador <jugadores> [cantidad]` | Da el Bloqueador Neural |
 | `/cp recargar` / `/cp restablecer` | Relee el archivo / valores por defecto |
@@ -98,6 +102,14 @@ Los valores se guardan en `config/zxkstudio_ciberpsicosis.json`.
 en cyberpsychosis no sirve (el ítem no se gasta). Al terminar el evento, `/cp modo normal`
 y vuelven a curar como siempre. El Inmunosupresor y el Bloqueador se usan como una inyección (sin gesto de beber): clic del inyector, pistón, pinchazo con sacudida de cámara, burbujeo, latido y chispas. El Inmunosupresor se craftea: botella de cristal, 2 lingotes
 de hierro, redstone y lapislázuli (sin forma).
+
+## Alucinaciones
+
+En cyberpsychosis el jugador "viaja" de vez en cuando a una **playa** o a una **montaña nevada**:
+bloques, hora, clima, sonidos y una figura (Ahogado o Enderman) que solo ve él. La figura se
+acerca cuando no la mira, y al final hay un susto (sin daño). Luego despierta en el mismo
+sitio, aún en cyberpsychosis. El mundo real no cambia. Durante la escena no puede romper ni
+colocar bloques. Si lo curas, la escena termina al instante.
 
 ## Notas
 
