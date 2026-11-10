@@ -7,7 +7,17 @@ Es la versión en código del datapack `sangre_jurasica`.
 > Este código está escrito pero **todavía no se ha compilado ni probado en el juego**.
 > Si al compilar sale algún error, pégaselo a Claude y se corrige.
 
-## Cómo compilarlo
+## Compilarlo en GitHub (sin instalar nada)
+
+1. Crea un repositorio público en GitHub y sube **todo el contenido de esta carpeta**
+   (incluida la carpeta oculta `.github`).
+2. Entra a la pestaña **Actions**. Se ejecuta solo en cada subida; también puedes lanzarlo
+   con **Run workflow**.
+3. Cuando termine, abre la ejecución y descarga **zxkstudio-mod** en *Artifacts*.
+   Dentro está el `.jar` (usa el que NO termina en `-sources`).
+4. Si sale en rojo, abre el paso **Compilar**, copia el error y pásaselo a Claude.
+
+## Compilarlo en tu PC
 
 Necesitas **Java 21** (JDK) instalado.
 
