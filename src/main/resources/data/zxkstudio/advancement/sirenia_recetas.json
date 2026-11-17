@@ -1,0 +1,14 @@
+{
+  "criteria": {
+    "t": {
+      "trigger": "minecraft:tick"
+    }
+  },
+  "rewards": {
+    "recipes": [
+      "zxkstudio:sirenia_planks",
+      "zxkstudio:sirenia_wood",
+      "zxkstudio:stripped_sirenia_wood"
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "zxkstudio:item/rotten_sirenia_fruit"
+  }
+}

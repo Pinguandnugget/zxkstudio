@@ -1,0 +1,7 @@
+{
+  "parent": "minecraft:block/cube_column_horizontal",
+  "textures": {
+    "end": "zxkstudio:block/stripped_sirenia_log_top",
+    "side": "zxkstudio:block/stripped_sirenia_log"
+  }
+}

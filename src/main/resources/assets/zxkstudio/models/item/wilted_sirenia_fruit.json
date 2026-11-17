@@ -1,0 +1,14 @@
+{
+  "parent": "minecraft:item/generated",
+  "textures": {
+    "layer0": "zxkstudio:item/wilted_sirenia_fruit"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "zxkstudio:fruit_stage": 1.0
+      },
+      "model": "zxkstudio:item/rotten_sirenia_fruit"
+    }
+  ]
+}
