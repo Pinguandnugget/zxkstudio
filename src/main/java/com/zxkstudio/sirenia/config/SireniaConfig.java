@@ -19,6 +19,9 @@ import java.nio.file.Path;
  */
 @SuppressWarnings("java:S116")
 public final class SireniaConfig {
+	/** Versión del archivo (0 = archivo anterior a este campo). Si es menor que 2 se migran los valores que cambiaron de diseño. */
+	public int config_version = 0;
+
 	// ---- Crecimiento del fruto (minutos de tiempo cargado desde el injerto) ----
 	public int fruit_small_minutes = 10;
 	public int fruit_growth_minutes = 25;
@@ -33,18 +36,23 @@ public final class SireniaConfig {
 	public double seed_bonus_chance = 0.25;
 
 	// ---- Efectos de los frutos ----
-	public int sirenomorphosis_duration_seconds = 300;
+	public int sirenomorphosis_duration_seconds = 180;
 	public int wilted_effect_duration_seconds = 60;
-	public int rotten_effect_duration_seconds = 10;
-	public int rotten_nausea_amplifier = 0;
-	public int rotten_poison_amplifier = 0;
+	/** Podredumbre de Sirenia (fruto podrido). 0 = dura hasta curarse con un Corazón de Sirenia en buen estado. */
+	public int rot_effect_duration_seconds = 0;
+	public float rot_damage = 1.0f;
+	public int rot_damage_interval_ticks = 25;
 
 	// ---- Sirenomorphosis ----
-	public boolean land_penalty_enabled = false;
-	public int land_air_loss_per_tick = 5;
-	public int land_grace_ticks = 40;
-	public float land_damage = 3.0f;
-	public int land_damage_interval_ticks = 40;
+	/** Fuera del agua el jugador se ahoga: pierde aire y, al agotarse, recibe daño de ahogamiento. */
+	public boolean land_penalty_enabled = true;
+	/** Aire que se pierde por tick fuera del agua. El juego devuelve 4 por tick por su cuenta, así que 9 = 5 netos. */
+	public int land_air_loss_per_tick = 9;
+	public int land_grace_ticks = 20;
+	public float land_damage = 2.0f;
+	public int land_damage_interval_ticks = 20;
+	/** Si es true, nadar con la cabeza fuera del agua (superficie) también cuenta como estar en el agua. */
+	public boolean land_breathe_when_touching_water = true;
 	public boolean underwater_mining_enabled = true;
 	public boolean underwater_speed_enabled = true;
 	/** 0 a 1. Eficiencia de movimiento en el agua (atributo de vanilla, como Agilidad Acuática). 1 = máximo. */
@@ -52,8 +60,11 @@ public final class SireniaConfig {
 	/** Solo lo lee el cliente (la niebla se dibuja en el cliente). */
 	public boolean underwater_vision_enabled = true;
 	public int underwater_vision_distance = 300;
+	/** Niebla corta y rosada fuera del agua, como en el efecto original de Dedsafio 3. Solo la lee el cliente. */
+	public boolean land_fog_enabled = true;
+	public int land_fog_distance = 20;
 	public boolean underwater_particles_enabled = true;
-	public int underwater_particle_interval_ticks = 10;
+	public int underwater_particle_interval_ticks = 5;
 
 	// ---- Generación natural (probabilidad por intento; hay 1 intento por chunk en superficie) ----
 	public boolean generation_enabled = true;
@@ -86,8 +97,23 @@ public final class SireniaConfig {
 				instance = new SireniaConfig();
 			}
 		}
+		instance.migrate();
 		instance.sanitize();
 		save();
+	}
+
+	/** Archivos creados con la versión anterior (sin config_version) pasan a los nuevos valores por defecto. */
+	private void migrate() {
+		if (config_version < 2) {
+			sirenomorphosis_duration_seconds = 180;
+			land_penalty_enabled = true;
+			land_air_loss_per_tick = 9;
+			land_grace_ticks = 20;
+			land_damage = 2.0f;
+			land_damage_interval_ticks = 20;
+			underwater_particle_interval_ticks = 5;
+			config_version = 2;
+		}
 	}
 
 	public static void save() {
@@ -113,9 +139,10 @@ public final class SireniaConfig {
 		seed_bonus_chance = Math.max(0.0, Math.min(1.0, seed_bonus_chance));
 		sirenomorphosis_duration_seconds = clamp(sirenomorphosis_duration_seconds, 1, 86400);
 		wilted_effect_duration_seconds = clamp(wilted_effect_duration_seconds, 1, 86400);
-		rotten_effect_duration_seconds = clamp(rotten_effect_duration_seconds, 1, 3600);
-		rotten_nausea_amplifier = clamp(rotten_nausea_amplifier, 0, 10);
-		rotten_poison_amplifier = clamp(rotten_poison_amplifier, 0, 10);
+		rot_effect_duration_seconds = clamp(rot_effect_duration_seconds, 0, 86400);
+		rot_damage = Math.max(0.0f, Math.min(1000.0f, rot_damage));
+		rot_damage_interval_ticks = clamp(rot_damage_interval_ticks, 1, 6000);
+		land_fog_distance = clamp(land_fog_distance, 4, 1000);
 		land_air_loss_per_tick = clamp(land_air_loss_per_tick, 1, 300);
 		land_grace_ticks = clamp(land_grace_ticks, 0, 6000);
 		land_damage = Math.max(0.0f, Math.min(1000.0f, land_damage));

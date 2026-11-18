@@ -1,12 +1,12 @@
 package com.zxkstudio.sirenia.item;
 
 import com.zxkstudio.sirenia.config.SireniaConfig;
+import com.zxkstudio.sirenia.effect.SireniaRot;
 import com.zxkstudio.sirenia.registry.ModEffects;
 import com.zxkstudio.sirenia.util.FruitAging;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.effect.StatusEffectInstance;
-import net.minecraft.entity.effect.StatusEffects;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -67,8 +67,7 @@ public class SireniaFruitItem extends Item {
 		// Solo se sustituye si la ranura corresponde de verdad a este objeto (evita errores con la mano secundaria).
 		if (slot >= 0 && slot < player.getInventory().main.size() && player.getInventory().getStack(slot) == stack) {
 			ItemStack replacement = new ItemStack(wanted, stack.getCount());
-			replacement.set(com.zxkstudio.sirenia.registry.ModComponents.BIRTH_TIME,
-					stack.get(com.zxkstudio.sirenia.registry.ModComponents.BIRTH_TIME));
+			FruitAging.copyClock(stack, replacement, now);
 			player.getInventory().setStack(slot, replacement);
 		}
 	}
@@ -80,10 +79,11 @@ public class SireniaFruitItem extends Item {
 		if (!world.isClient) {
 			SireniaConfig cfg = SireniaConfig.get();
 			if (stage == FruitAging.ROTTEN) {
-				int ticks = cfg.rotten_effect_duration_seconds * 20;
-				user.addStatusEffect(new StatusEffectInstance(StatusEffects.NAUSEA, ticks, cfg.rotten_nausea_amplifier));
-				user.addStatusEffect(new StatusEffectInstance(StatusEffects.POISON, ticks, cfg.rotten_poison_amplifier));
+				SireniaRot.infect(user);
 			} else {
+				if (stage == FruitAging.MATURE) {
+					SireniaRot.cure(user); // solo un fruto en buen estado cura la Podredumbre de Sirenia
+				}
 				int seconds = stage == FruitAging.WILTED ? cfg.wilted_effect_duration_seconds
 						: cfg.sirenomorphosis_duration_seconds;
 				user.addStatusEffect(new StatusEffectInstance(ModEffects.SIRENOMORPHOSIS, seconds * 20, 0, false, true, true));

@@ -2,6 +2,7 @@ package com.zxkstudio.sirenia;
 
 import com.zxkstudio.ZxkStudio;
 import com.zxkstudio.sirenia.config.SireniaConfig;
+import com.zxkstudio.sirenia.effect.SireniaRot;
 import com.zxkstudio.sirenia.effect.SirenomorphosisEvents;
 import com.zxkstudio.sirenia.registry.ModBlockEntities;
 import com.zxkstudio.sirenia.registry.ModBlocks;
@@ -43,6 +44,7 @@ public final class Sirenia {
 		flammable.add(ModBlocks.SIRENIA_LEAVES, 30, 60);
 
 		SirenomorphosisEvents.register();
+		SireniaRot.register();
 		SireniaWorldgen.register();
 		ZxkStudio.LOGGER.info("PotitoSirenia cargado: Árbol de Sirenia y Sirenomorphosis listos");
 	}

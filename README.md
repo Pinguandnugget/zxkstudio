@@ -141,15 +141,33 @@ sola línea desde `ZxkStudio`, así que no altera Sangre Jurásica ni Cyberpsych
 5. Polvo de hueso: 2 para fruto pequeño, 5 en total para maduro. No funciona en frutos maduros, marchitos ni podridos.
 6. Clic derecho para cosechar. El tronco no se rompe y la cara queda libre para otra semilla.
 
-Los frutos siguen envejeciendo en inventarios y contenedores (la fecha va en el componente `zxkstudio:birth_time`,
-así que dividir o mover stacks no la reinicia). Maduro = Sirenomorphosis 300 s, marchito = 60 s,
-podrido = náuseas y veneno 10 s.
+Los frutos siguen envejeciendo en inventarios y contenedores (la fecha va en el componente `zxkstudio:fruit_clock`,
+así que dividir o mover stacks no la reinicia).
+
+**Apilado de frutos**: se apilan solo los de la misma fase (maduro con maduro, etc.), aunque tengan minutos distintos de vida.
+Cada fruto nace con su propio reloj al cosecharse. Al unir stacks, el resultado conserva el reloj del stack de destino.
+Cuando un stack llega a su siguiente fase, pasa a ser del objeto de esa fase y deja de apilarse con los de la anterior.
+
+**Efectos**:
+- Corazón maduro: Sirenomorphosis 180 s (3 min). Respiras, minas y nadas mejor bajo el agua y ves más lejos
+  (niebla del original de Dedsafio 3). **Fuera del agua te ahogas** (aire y daño de ahogamiento).
+  Cura la Podredumbre de Sirenia.
+- Corazón marchito: Sirenomorphosis 60 s. No cura la Podredumbre.
+- Corazón podrido: **Podredumbre de Sirenia** (`zxkstudio:sirenia_rot`): pantalla teñida de cian, corazones celestes y
+  daño constante que nunca mata. Dura hasta curarse comiendo un Corazón de Sirenia maduro (la leche no la cura).
+  Morir también la quita.
+
+**Creativo**: todo el contenido de zxkstudio está en la pestaña **zxkstudio** (Sirenia, Antídoto de Ámbar,
+Inmunosupresor y Bloqueador Neural).
 
 **Configuración**: `config/zxkstudio_sirenia.json` (se crea al primer arranque; los cambios se aplican al reiniciar).
-Incluye tiempos, agua, duraciones, `land_penalty_enabled` (por defecto `false`), minería/velocidad/visión/partículas
-submarinas y la frecuencia de generación (`mangrove_chance`, `coast_chance`, `lush_cave_chance`, `generation_enabled`).
+Incluye tiempos, agua, duraciones, `land_penalty_enabled` (ahogo fuera del agua, por defecto `true`),
+minería/velocidad/visión/partículas submarinas, niebla en tierra (`land_fog_enabled`), la Podredumbre
+(`rot_effect_duration_seconds`, 0 = hasta curarse) y la frecuencia de generación (`mangrove_chance`, `coast_chance`,
+`lush_cave_chance`, `generation_enabled`). Si el archivo viene de la primera versión, se migra solo a los valores nuevos
+(3 min y ahogo activado).
 
-**Mixin**: solo uno, `BackgroundRendererMixin` (cliente), para alargar la niebla del agua con Sirenomorphosis.
-Si otro mod cambia ese método simplemente no se aplica (`require = 0`).
+**Mixins** (solo cliente, ambos con `require = 0`: si otro mod cambia el método, simplemente no se aplican):
+`BackgroundRendererMixin` (niebla y color de Sirenomorphosis) y `HeartTypeMixin` (corazones celestes de la Podredumbre).
 
 Como hay bloques, texturas y modelos propios, el mod debe estar en el servidor y en los clientes.
