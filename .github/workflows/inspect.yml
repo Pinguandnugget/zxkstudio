@@ -1,0 +1,36 @@
+name: Inspeccionar APIs
+on:
+  push:
+    branches: [tmp-inspect]
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+      - name: Compilar para poblar cachés
+        run: gradle build --stacktrace
+      - name: Volcar firmas
+        run: |
+          MC=$(find ~/.gradle/caches/fabric-loom -name 'minecraft-*merged*yarn*.jar' ! -name '*sources*' | head -1)
+          echo "MC=$MC"
+          echo "=== BackgroundRenderer"; javap -p -cp "$MC" net.minecraft.client.render.BackgroundRenderer
+          echo "=== BackgroundRenderer.applyFog/render calls"; javap -p -c -cp "$MC" net.minecraft.client.render.BackgroundRenderer | grep -nE "Method|Field|^  (public|private|static).*\(" | grep -E "Fog|clearColor|static .*(render|applyFog|setFogBlack)|red|green|blue" | head -60
+          echo "=== HeartType"; javap -p -cp "$MC" 'net.minecraft.client.gui.hud.InGameHud$HeartType'
+          echo "=== InGameHud heart methods"; javap -p -cp "$MC" net.minecraft.client.gui.hud.InGameHud | grep -iE "heart|health"
+          echo "=== StatusEffectInstance"; javap -p -cp "$MC" net.minecraft.entity.effect.StatusEffectInstance | grep -iE "cure|INFINITE|<init>"
+          echo "=== StatusEffect"; javap -p -cp "$MC" net.minecraft.entity.effect.StatusEffect | grep -iE "cure|applyUpdate|canApply|<init>"
+          echo "=== EffectCures"; javap -p -cp "$MC" net.minecraft.entity.effect.StatusEffectInstance | grep -i cure; find ~/.gradle/caches/fabric-loom -name '*.jar' | head -20
+          echo "=== ItemStack eq"; javap -p -cp "$MC" net.minecraft.item.ItemStack | grep -iE "areItemsAndComponentsEqual|areEqual|increment|split"
+          echo "=== RenderSystem fog"; javap -p -cp "$MC" com.mojang.blaze3d.systems.RenderSystem | grep -i fog
+          echo "=== DamageSources"; javap -p -cp "$MC" net.minecraft.entity.damage.DamageSources | grep -iE "drown|dryOut|magic"
+          echo "=== LivingEntity air"; javap -p -cp "$MC" net.minecraft.entity.LivingEntity | grep -iE "air|tickStatusEffects|removeStatusEffect|clearStatusEffects"
+          echo "=== Fabric client APIs"
+          for J in $(find ~/.gradle/caches -name 'fabric-*api*.jar' -o -name 'fabric-rendering-v1*.jar' -o -name 'fabric-item-api*.jar' | head -80); do unzip -l "$J" 2>/dev/null | grep -E "HudRenderCallback|ItemTooltipCallback" | sed "s|^|$J: |"; done
+          for C in net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback; do FJ=$(find ~/.gradle/caches -name '*.jar' | xargs -I{} sh -c "unzip -l {} 2>/dev/null | grep -q '$(echo $C | tr . /).class' && echo {}" | head -1); echo "--- $C in $FJ"; javap -p -cp "$FJ:$MC" $C; done
