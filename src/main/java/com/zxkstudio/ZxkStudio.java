@@ -18,6 +18,8 @@ public class ZxkStudio implements ModInitializer {
 		CiberPsicosis.register();
 		Alucinacion.register();
 		CiberCommands.register();
+		// PotitoSirenia (Árbol de Sirenia, injertos y Sirenomorphosis): vive en su propio paquete.
+		com.zxkstudio.sirenia.Sirenia.init();
 		LOGGER.info("zxkstudio cargado: Sangre Jurásica y Cyberpsychosis listas");
 	}
 }

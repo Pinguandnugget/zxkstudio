@@ -1,0 +1,12 @@
+{
+  "required": false,
+  "minVersion": "0.8",
+  "package": "com.zxkstudio.sirenia.mixin.client",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "BackgroundRendererMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 0
+  }
+}

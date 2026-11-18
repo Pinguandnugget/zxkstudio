@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "zxkstudio:block/stripped_sirenia_log"
+    },
+    "axis=z": {
+      "model": "zxkstudio:block/stripped_sirenia_log_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "zxkstudio:block/stripped_sirenia_log_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

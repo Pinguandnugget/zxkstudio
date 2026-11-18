@@ -1,0 +1,157 @@
+package com.zxkstudio.sirenia.config;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.zxkstudio.ZxkStudio;
+import net.fabricmc.loader.api.FabricLoader;
+
+import java.io.IOException;
+import java.io.Reader;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+/**
+ * Ajustes de PotitoSirenia. Se guardan en config/zxkstudio_sirenia.json.
+ * Los nombres de los campos son los mismos que aparecen en el JSON.
+ * Gson ya viene incluido en Minecraft, no hace falta ninguna dependencia extra.
+ */
+@SuppressWarnings("java:S116")
+public final class SireniaConfig {
+	// ---- Crecimiento del fruto (minutos de tiempo cargado desde el injerto) ----
+	public int fruit_small_minutes = 10;
+	public int fruit_growth_minutes = 25;
+	public int fruit_wilt_minutes = 55;
+	public int fruit_rot_minutes = 70;
+
+	// ---- Cultivo ----
+	public int bone_meal_required = 5;
+	public int required_water_blocks = 4;
+	public int water_detection_radius = 3;
+	/** Probabilidad (0 a 1) de que un fruto maduro cosechado dé un Germen extra. */
+	public double seed_bonus_chance = 0.25;
+
+	// ---- Efectos de los frutos ----
+	public int sirenomorphosis_duration_seconds = 300;
+	public int wilted_effect_duration_seconds = 60;
+	public int rotten_effect_duration_seconds = 10;
+	public int rotten_nausea_amplifier = 0;
+	public int rotten_poison_amplifier = 0;
+
+	// ---- Sirenomorphosis ----
+	public boolean land_penalty_enabled = false;
+	public int land_air_loss_per_tick = 5;
+	public int land_grace_ticks = 40;
+	public float land_damage = 3.0f;
+	public int land_damage_interval_ticks = 40;
+	public boolean underwater_mining_enabled = true;
+	public boolean underwater_speed_enabled = true;
+	/** 0 a 1. Eficiencia de movimiento en el agua (atributo de vanilla, como Agilidad Acuática). 1 = máximo. */
+	public double underwater_swim_efficiency = 1.0;
+	/** Solo lo lee el cliente (la niebla se dibuja en el cliente). */
+	public boolean underwater_vision_enabled = true;
+	public int underwater_vision_distance = 300;
+	public boolean underwater_particles_enabled = true;
+	public int underwater_particle_interval_ticks = 10;
+
+	// ---- Generación natural (probabilidad por intento; hay 1 intento por chunk en superficie) ----
+	public boolean generation_enabled = true;
+	public double mangrove_chance = 0.12;
+	public double coast_chance = 0.03;
+	public double lush_cave_chance = 0.05;
+	public boolean require_water_for_generation = true;
+
+	private static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();
+	private static SireniaConfig instance = new SireniaConfig();
+
+	public static SireniaConfig get() {
+		return instance;
+	}
+
+	private static Path path() {
+		return FabricLoader.getInstance().getConfigDir().resolve("zxkstudio_sirenia.json");
+	}
+
+	public static void load() {
+		Path p = path();
+		if (Files.exists(p)) {
+			try (Reader reader = Files.newBufferedReader(p, StandardCharsets.UTF_8)) {
+				SireniaConfig read = GSON.fromJson(reader, SireniaConfig.class);
+				if (read != null) {
+					instance = read;
+				}
+			} catch (Exception e) {
+				ZxkStudio.LOGGER.error("No se pudo leer {}; se usan los valores por defecto", p, e);
+				instance = new SireniaConfig();
+			}
+		}
+		instance.sanitize();
+		save();
+	}
+
+	public static void save() {
+		Path p = path();
+		try {
+			Files.createDirectories(p.getParent());
+			try (Writer writer = Files.newBufferedWriter(p, StandardCharsets.UTF_8)) {
+				GSON.toJson(instance, writer);
+			}
+		} catch (IOException e) {
+			ZxkStudio.LOGGER.error("No se pudo guardar {}", p, e);
+		}
+	}
+
+	private void sanitize() {
+		fruit_small_minutes = clamp(fruit_small_minutes, 0, 100000);
+		fruit_growth_minutes = clamp(fruit_growth_minutes, fruit_small_minutes + 1, 100000);
+		fruit_wilt_minutes = clamp(fruit_wilt_minutes, fruit_growth_minutes + 1, 100000);
+		fruit_rot_minutes = clamp(fruit_rot_minutes, fruit_wilt_minutes + 1, 100000);
+		bone_meal_required = clamp(bone_meal_required, 1, 64);
+		required_water_blocks = clamp(required_water_blocks, 0, 200);
+		water_detection_radius = clamp(water_detection_radius, 1, 6);
+		seed_bonus_chance = Math.max(0.0, Math.min(1.0, seed_bonus_chance));
+		sirenomorphosis_duration_seconds = clamp(sirenomorphosis_duration_seconds, 1, 86400);
+		wilted_effect_duration_seconds = clamp(wilted_effect_duration_seconds, 1, 86400);
+		rotten_effect_duration_seconds = clamp(rotten_effect_duration_seconds, 1, 3600);
+		rotten_nausea_amplifier = clamp(rotten_nausea_amplifier, 0, 10);
+		rotten_poison_amplifier = clamp(rotten_poison_amplifier, 0, 10);
+		land_air_loss_per_tick = clamp(land_air_loss_per_tick, 1, 300);
+		land_grace_ticks = clamp(land_grace_ticks, 0, 6000);
+		land_damage = Math.max(0.0f, Math.min(1000.0f, land_damage));
+		land_damage_interval_ticks = clamp(land_damage_interval_ticks, 1, 6000);
+		underwater_swim_efficiency = Math.max(0.0, Math.min(1.0, underwater_swim_efficiency));
+		underwater_vision_distance = clamp(underwater_vision_distance, 8, 1000);
+		underwater_particle_interval_ticks = clamp(underwater_particle_interval_ticks, 2, 200);
+		mangrove_chance = Math.max(0.0, Math.min(1.0, mangrove_chance));
+		coast_chance = Math.max(0.0, Math.min(1.0, coast_chance));
+		lush_cave_chance = Math.max(0.0, Math.min(1.0, lush_cave_chance));
+	}
+
+	private static int clamp(int v, int min, int max) {
+		return Math.max(min, Math.min(max, v));
+	}
+
+	// ---- Valores derivados ----
+
+	public long smallTicks() {
+		return fruit_small_minutes * 1200L;
+	}
+
+	public long matureTicks() {
+		return fruit_growth_minutes * 1200L;
+	}
+
+	public long wiltTicks() {
+		return fruit_wilt_minutes * 1200L;
+	}
+
+	public long rotTicks() {
+		return fruit_rot_minutes * 1200L;
+	}
+
+	/** Polvo de hueso necesario para pasar de injerto a fruto pequeño (2 de 5 por defecto). */
+	public int boneMealForSmall() {
+		return Math.max(1, Math.min(bone_meal_required, Math.round(bone_meal_required * 0.4f)));
+	}
+}

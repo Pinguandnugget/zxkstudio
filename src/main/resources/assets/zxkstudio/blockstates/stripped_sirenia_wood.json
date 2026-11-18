@@ -1,0 +1,16 @@
+{
+  "variants": {
+    "axis=y": {
+      "model": "zxkstudio:block/stripped_sirenia_wood"
+    },
+    "axis=z": {
+      "model": "zxkstudio:block/stripped_sirenia_wood_horizontal",
+      "x": 90
+    },
+    "axis=x": {
+      "model": "zxkstudio:block/stripped_sirenia_wood_horizontal",
+      "x": 90,
+      "y": 90
+    }
+  }
+}

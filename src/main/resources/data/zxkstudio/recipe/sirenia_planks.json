@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "group": "planks",
+  "ingredients": [
+    {
+      "tag": "zxkstudio:sirenia_logs"
+    }
+  ],
+  "result": {
+    "id": "zxkstudio:sirenia_planks",
+    "count": 4
+  }
+}

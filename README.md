@@ -124,3 +124,32 @@ bioma de playa o helado (cielo, niebla, hierba), hora, ventisca y sonidos. El mu
 - Los tags de dinosaurios están en `data/zxkstudio/tags/entity_type/sangre_jurasica/`
   y se pueden cambiar con un datapack.
 - No dejes instalados los datapacks `sangre_jurasica` ni `ciberpsicosis` originales junto con este mod: harían lo mismo dos veces.
+
+## PotitoSirenia (Árbol de Sirenia)
+
+Todo usa el namespace `zxkstudio:`. El código está en `com.zxkstudio.sirenia` y se arranca con una
+sola línea desde `ZxkStudio`, así que no altera Sangre Jurásica ni Cyberpsychosis.
+
+**Cómo se cultiva** (no se planta ningún árbol, solo crece el fruto):
+
+1. Encuentra un Árbol de Sirenia (manglares, raro; costas cálidas, muy raro; cuevas frondosas, excepcional).
+2. Pela un tronco con un hacha.
+3. Clic derecho con un **Germen de Sirenia** en una cara lateral del tronco pelado. Hace falta que la base
+   del árbol esté sobre barro y que haya 4 fuentes de agua a 3 bloques o menos. Si falta algo, no se gasta la semilla.
+4. Cada tronco admite hasta 4 injertos (uno por cara). Crecen solos: injerto → pequeño (10 min) → maduro (25) →
+   marchito (55) → podrido (70), en minutos de tiempo cargado. Con condiciones inválidas el crecimiento se pausa.
+5. Polvo de hueso: 2 para fruto pequeño, 5 en total para maduro. No funciona en frutos maduros, marchitos ni podridos.
+6. Clic derecho para cosechar. El tronco no se rompe y la cara queda libre para otra semilla.
+
+Los frutos siguen envejeciendo en inventarios y contenedores (la fecha va en el componente `zxkstudio:birth_time`,
+así que dividir o mover stacks no la reinicia). Maduro = Sirenomorphosis 300 s, marchito = 60 s,
+podrido = náuseas y veneno 10 s.
+
+**Configuración**: `config/zxkstudio_sirenia.json` (se crea al primer arranque; los cambios se aplican al reiniciar).
+Incluye tiempos, agua, duraciones, `land_penalty_enabled` (por defecto `false`), minería/velocidad/visión/partículas
+submarinas y la frecuencia de generación (`mangrove_chance`, `coast_chance`, `lush_cave_chance`, `generation_enabled`).
+
+**Mixin**: solo uno, `BackgroundRendererMixin` (cliente), para alargar la niebla del agua con Sirenomorphosis.
+Si otro mod cambia ese método simplemente no se aplica (`require = 0`).
+
+Como hay bloques, texturas y modelos propios, el mod debe estar en el servidor y en los clientes.
