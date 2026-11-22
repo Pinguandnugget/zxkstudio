@@ -2,6 +2,7 @@ package com.zxkstudio.sirenia.item;
 
 import com.zxkstudio.sirenia.config.SireniaConfig;
 import com.zxkstudio.sirenia.effect.SireniaRot;
+import com.zxkstudio.sirenia.fear.Thalassophobia;
 import com.zxkstudio.sirenia.registry.ModEffects;
 import com.zxkstudio.sirenia.util.FruitAging;
 import net.minecraft.entity.Entity;
@@ -84,6 +85,7 @@ public class SireniaFruitItem extends Item {
 				if (stage == FruitAging.MATURE) {
 					SireniaRot.cure(user); // solo un fruto en buen estado cura la Podredumbre de Sirenia
 				}
+				Thalassophobia.cure(user); // el fruto (maduro o marchito) quita el miedo al agua profunda
 				int seconds = stage == FruitAging.WILTED ? cfg.wilted_effect_duration_seconds
 						: cfg.sirenomorphosis_duration_seconds;
 				user.addStatusEffect(new StatusEffectInstance(ModEffects.SIRENOMORPHOSIS, seconds * 20, 0, false, true, true));

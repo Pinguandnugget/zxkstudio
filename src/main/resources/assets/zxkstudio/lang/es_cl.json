@@ -57,5 +57,6 @@
   "block.zxkstudio.stripped_sirenia_wood.desc1": "Madera pelada: también admite Gérmenes de Sirenia.",
   "block.zxkstudio.sirenia_planks.desc1": "Tablones de la madera de Sirenia.",
   "block.zxkstudio.sirenia_leaves.desc1": "Hojas verde azuladas del Árbol de Sirenia.",
-  "block.zxkstudio.sirenia_leaves.desc2": "Con suerte sueltan un Germen de Sirenia."
+  "block.zxkstudio.sirenia_leaves.desc2": "Con suerte sueltan un Germen de Sirenia.",
+  "effect.zxkstudio.thalassophobia": "Talasofobia"
 }

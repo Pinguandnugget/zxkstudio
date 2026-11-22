@@ -171,3 +171,19 @@ minería/velocidad/visión/partículas submarinas, niebla en tierra (`land_fog_e
 `BackgroundRendererMixin` (niebla y color de Sirenomorphosis) y `HeartTypeMixin` (corazones celestes de la Podredumbre).
 
 Como hay bloques, texturas y modelos propios, el mod debe estar en el servidor y en los clientes.
+
+## Talasofobia (miedo al agua profunda)
+
+Apagada por defecto. Un operador la activa con `/talasofobia on` (y `off`); también `/talasofobia estado` y
+`/talasofobia curar <jugadores>`.
+
+1. Con la cabeza bajo el agua y 12 bloques de agua o más bajo los pies, tras 10 s seguidos aparece el efecto **Talasofobia**.
+2. Tienes **45 s** para reaccionar (cuenta atrás en el HUD). En los últimos 10 s empiezan las alucinaciones: sonidos
+   fuertes del fondo del mar, un tiburón fantasma que se acerca y "muerde" (golpe de cámara y sonido, sin quitar vida),
+   el susto del Guardián Anciano y la pantalla que se oscurece.
+3. Al llegar a 0 empieza el **pánico**: cada 4 s recibes un golpe letal que gasta un tótem (o te mata).
+4. **Cura**: salir del agua o comer un Corazón de Sirenia maduro o marchito. Con Sirenomorphosis activa eres inmune.
+   La leche o el tótem no la quitan; morir sí.
+
+Todo lo falso solo lo ve el jugador afectado y no hay entidades reales (el "tiburón" son paquetes con el modelo del delfín).
+Se ajusta con las opciones `thalassophobia_*` del archivo de configuración.

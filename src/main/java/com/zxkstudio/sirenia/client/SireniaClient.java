@@ -14,6 +14,7 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.item.ModelPredicateProviderRegistry;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.entity.effect.StatusEffectInstance;
 import net.minecraft.item.Item;
 import net.minecraft.registry.Registries;
 import net.minecraft.text.Text;
@@ -52,6 +53,29 @@ public class SireniaClient implements ClientModInitializer {
 			int alpha = 80 + (int) (40 * pulse);
 			context.fill(0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(),
 					(alpha << 24) | 0x0FD2D2);
+		});
+
+		// Talasofobia: en los últimos 10 s la pantalla se oscurece con pulso; en pánico (efecto infinito) queda muy oscura.
+		HudRenderCallback.EVENT.register((context, tickCounter) -> {
+			ClientPlayerEntity player = MinecraftClient.getInstance().player;
+			if (player == null) {
+				return;
+			}
+			StatusEffectInstance fear = player.getStatusEffect(ModEffects.THALASSOPHOBIA);
+			if (fear == null) {
+				return;
+			}
+			int alpha;
+			if (fear.isInfinite()) {
+				alpha = 150 + (int) (40 * (0.5f + 0.5f * MathHelper.sin(player.age * 0.25f)));
+			} else if (fear.getDuration() <= 200) {
+				float progress = 1.0f - fear.getDuration() / 200.0f;
+				alpha = (int) (130 * progress * (0.75f + 0.25f * MathHelper.sin(player.age * 0.3f)));
+			} else {
+				return;
+			}
+			context.fill(0, 0, context.getScaledWindowWidth(), context.getScaledWindowHeight(),
+					(MathHelper.clamp(alpha, 0, 255) << 24) | 0x03081A);
 		});
 
 		// Descripciones: si el idioma trae "<clave del objeto>.desc1", ".desc2"..., se añaden al final del tooltip.

@@ -66,6 +66,22 @@ public final class SireniaConfig {
 	public boolean underwater_particles_enabled = true;
 	public int underwater_particle_interval_ticks = 5;
 
+	// ---- Talasofobia (miedo al agua profunda). Apagada por defecto; se activa con /talasofobia on ----
+	public boolean thalassophobia_enabled = false;
+	/** Bloques de agua seguidos por debajo del jugador (con la cabeza bajo el agua) para contar como "abismo". */
+	public int thalassophobia_depth_blocks = 12;
+	/** Segundos seguidos en el abismo antes de que aparezca el miedo. */
+	public int thalassophobia_expose_seconds = 10;
+	/** Segundos que tiene para reaccionar (salir del agua o comer un Corazón de Sirenia). */
+	public int thalassophobia_countdown_seconds = 45;
+	/** En los últimos segundos de la cuenta atrás empiezan las alucinaciones. */
+	public int thalassophobia_hallucination_seconds = 10;
+	/** Al llegar a 0 empieza el pánico: cada tantos segundos recibe un golpe letal que gasta un tótem (o lo mata). */
+	public int thalassophobia_panic_interval_seconds = 4;
+	public boolean thalassophobia_immune_with_sirenomorphosis = true;
+	/** Volumen de los sonidos de las alucinaciones (1 = normal). */
+	public float thalassophobia_sound_volume = 2.0f;
+
 	// ---- Generación natural (probabilidad por intento; hay 1 intento por chunk en superficie) ----
 	public boolean generation_enabled = true;
 	public double mangrove_chance = 0.12;
@@ -129,6 +145,12 @@ public final class SireniaConfig {
 	}
 
 	private void sanitize() {
+		thalassophobia_depth_blocks = clamp(thalassophobia_depth_blocks, 3, 64);
+		thalassophobia_expose_seconds = clamp(thalassophobia_expose_seconds, 1, 600);
+		thalassophobia_countdown_seconds = clamp(thalassophobia_countdown_seconds, 5, 3600);
+		thalassophobia_hallucination_seconds = clamp(thalassophobia_hallucination_seconds, 1, thalassophobia_countdown_seconds);
+		thalassophobia_panic_interval_seconds = clamp(thalassophobia_panic_interval_seconds, 1, 600);
+		thalassophobia_sound_volume = Math.max(0.1f, Math.min(4.0f, thalassophobia_sound_volume));
 		fruit_small_minutes = clamp(fruit_small_minutes, 0, 100000);
 		fruit_growth_minutes = clamp(fruit_growth_minutes, fruit_small_minutes + 1, 100000);
 		fruit_wilt_minutes = clamp(fruit_wilt_minutes, fruit_growth_minutes + 1, 100000);

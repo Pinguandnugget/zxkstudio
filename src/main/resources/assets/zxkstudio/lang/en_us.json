@@ -57,5 +57,6 @@
   "block.zxkstudio.stripped_sirenia_wood.desc1": "Stripped wood: also accepts Sirenia Germs.",
   "block.zxkstudio.sirenia_planks.desc1": "Planks made from Sirenia wood.",
   "block.zxkstudio.sirenia_leaves.desc1": "Blue-green leaves of the Sirenia Tree.",
-  "block.zxkstudio.sirenia_leaves.desc2": "With luck they drop a Sirenia Germ."
+  "block.zxkstudio.sirenia_leaves.desc2": "With luck they drop a Sirenia Germ.",
+  "effect.zxkstudio.thalassophobia": "Thalassophobia"
 }

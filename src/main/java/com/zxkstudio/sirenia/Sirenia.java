@@ -3,6 +3,8 @@ package com.zxkstudio.sirenia;
 import com.zxkstudio.ZxkStudio;
 import com.zxkstudio.sirenia.config.SireniaConfig;
 import com.zxkstudio.sirenia.effect.SireniaRot;
+import com.zxkstudio.sirenia.fear.Thalassophobia;
+import com.zxkstudio.sirenia.fear.ThalassophobiaCommand;
 import com.zxkstudio.sirenia.effect.SirenomorphosisEvents;
 import com.zxkstudio.sirenia.registry.ModBlockEntities;
 import com.zxkstudio.sirenia.registry.ModBlocks;
@@ -45,6 +47,8 @@ public final class Sirenia {
 
 		SirenomorphosisEvents.register();
 		SireniaRot.register();
+		Thalassophobia.register();
+		ThalassophobiaCommand.register();
 		SireniaWorldgen.register();
 		ZxkStudio.LOGGER.info("PotitoSirenia cargado: Árbol de Sirenia y Sirenomorphosis listos");
 	}
