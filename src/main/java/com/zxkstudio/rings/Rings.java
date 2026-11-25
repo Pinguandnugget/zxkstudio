@@ -55,16 +55,32 @@ public final class Rings implements ModInitializer {
     private static Item item(String key,String name,boolean unique){
         return Registry.register(Registries.ITEM,id(key),new Item(new Item.Settings().maxCount(unique?1:64).component(DataComponentTypes.ITEM_NAME,Text.literal(name))));
     }
+    private static final String[][][] RING_DESCRIPTIONS = {
+        {{"La primera chispa de una vida olvidada.","+2 corazones máximos"},{"La vida florece donde antes hubo cenizas.","+4 corazones máximos"},{"Una esencia que desafía el paso del tiempo.","+6 corazones máximos","Cura ½ corazón cada 3 s"}},
+        {{"El tiempo favorece a su portador.","+20% velocidad de movimiento"},{"Cada paso desafía el paso de los años.","+40% velocidad de movimiento"},{"Una reliquia que preserva la vitalidad.","+40% velocidad de movimiento","20% reducción de daño compatible"}},
+        {{"La gravedad comienza a perder su dominio.","En dimensiones espaciales:","40% menos gravedad · +15% movilidad","30% protección contra vacío · 20% radiación","Inmunidad a daño por caída"},{"El vacío reconoce a su portador.","En dimensiones espaciales:","70% menos gravedad · +35% movilidad","60% protección contra vacío · 50% radiación","Inmunidad a daño por caída"},{"Una estrella comprimida en una reliquia.","En dimensiones espaciales:","Gravedad nula · +60% movilidad","Inmunidad al vacío · 80% protección radiación","Inmunidad a daño por caída","Impulso: agáchate + clic derecho (15 s)"}},
+        {{"Cada herida alimenta su sed de justicia.","+10% daño de ataque"},{"El rencor se convierte en poder.","+20% daño de ataque"},{"La furia crece mientras la vida se desvanece.","+20% a +40% daño según salud perdida"}},
+        {{"El océano reconoce a quien la porta.","Sumergido en biomas oceánicos:","+0,25 eficiencia de movimiento acuático","Oxígeno mejorado · visión parcial","Cura ½ corazón cada 8 s","10% protección marina · 25% presión"},{"El silencio de las profundidades es su refugio.","Sumergido en biomas oceánicos:","+0,60 eficiencia de movimiento acuático","Oxígeno mejorado · visión completa","Cura ½ corazón cada 4 s","20% protección marina · 60% presión"},{"El poder del Leviatán late en su interior.","Sumergido en biomas oceánicos:","+1 eficiencia de movimiento acuático","Respiración infinita · visión completa","Cura 1 corazón cada 3 s","35% protección marina · inmunidad a presión","Impulso: agáchate + clic derecho (15 s)"}}
+    };
+    private static LoreComponent ringLore(int branch,int tier){
+        List<Text> lines=new ArrayList<>();
+        lines.add(Text.literal(tier==1?"Despertar":tier==2?"Ascensión":"Trascendencia").formatted(COLORS[branch],Formatting.BOLD));
+        String[] details=RING_DESCRIPTIONS[branch][tier-1];
+        lines.add(Text.literal(details[0]).formatted(Formatting.GRAY,Formatting.ITALIC));
+        for(int i=1;i<details.length;i++)lines.add(Text.literal(details[i]).formatted(COLORS[branch]));
+        lines.add(Text.literal("Equipar en la mano secundaria").formatted(Formatting.GRAY));
+        return new LoreComponent(lines);
+    }
     private static void register(String key,String name,int branch,int tier){
         Item it=Registry.register(Registries.ITEM,id("anillo_"+key),new Item(new Item.Settings().maxCount(1)
           .rarity(tier==1?Rarity.RARE:Rarity.EPIC)
           .component(DataComponentTypes.ITEM_NAME,Text.literal(name).formatted(COLORS[branch],Formatting.BOLD))
-          .component(DataComponentTypes.LORE,new LoreComponent(List.of(Text.literal("Equipar en la mano secundaria").formatted(Formatting.GRAY),Text.literal(tier==1?"Despertar":tier==2?"Ascensión":"Trascendencia").formatted(COLORS[branch]))))));
+          .component(DataComponentTypes.LORE,ringLore(branch,tier))));
         Ring r=new Ring(branch,tier,it); RINGS.put(it,r); TIERS[branch][tier-1]=r;
     }
     @Override public void onInitialize(){
         loadSpace();
-        dormant=item("anillo_sin_vida","Anillo sin vida",true);
+        dormant=Registry.register(Registries.ITEM,id("anillo_sin_vida"),new Item(new Item.Settings().maxCount(1).component(DataComponentTypes.ITEM_NAME,Text.literal("Anillo sin vida").formatted(Formatting.GRAY)).component(DataComponentTypes.LORE,new LoreComponent(List.of(Text.literal("Reliquia inerte").formatted(Formatting.GRAY),Text.literal("Una antigua joya que ha perdido su esencia.").formatted(Formatting.GRAY,Formatting.ITALIC),Text.literal("Sin beneficios · Botín de raids").formatted(Formatting.DARK_GRAY),Text.literal("Combínala con materiales de una rama para despertarla.").formatted(Formatting.YELLOW))))));
         register("vida", "Anillo de la Vida", 0, 1);
         register("renacer", "Anillo del Renacer", 0, 2);
         register("eternidad", "Corazón de la Eternidad", 0, 3);
