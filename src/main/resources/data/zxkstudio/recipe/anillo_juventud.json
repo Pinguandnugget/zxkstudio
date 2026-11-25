@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "zxkstudio:anillo_sin_vida"
+    },
+    {
+      "item": "zxkstudio:fragmento_temporal"
+    },
+    {
+      "item": "zxkstudio:fragmento_temporal"
+    }
+  ],
+  "result": {
+    "id": "zxkstudio:anillo_juventud",
+    "count": 1
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "package": "com.zxkstudio.rings",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "RingDamageMixin"
+  ],
+  "client": [
+    "RingVisionMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

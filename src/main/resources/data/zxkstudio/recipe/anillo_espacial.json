@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "zxkstudio:anillo_sin_vida"
+    },
+    {
+      "item": "zxkstudio:nucleo_phora"
+    },
+    {
+      "item": "zxkstudio:nucleo_phora"
+    }
+  ],
+  "result": {
+    "id": "zxkstudio:anillo_espacial",
+    "count": 1
+  }
+}

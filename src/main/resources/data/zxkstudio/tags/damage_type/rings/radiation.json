@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "zxkstudio:radiation",
+      "required": false
+    }
+  ]
+}

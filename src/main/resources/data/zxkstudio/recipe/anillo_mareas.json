@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "zxkstudio:anillo_sin_vida"
+    },
+    {
+      "item": "zxkstudio:escama_abisal"
+    },
+    {
+      "item": "zxkstudio:escama_abisal"
+    }
+  ],
+  "result": {
+    "id": "zxkstudio:anillo_mareas",
+    "count": 1
+  }
+}

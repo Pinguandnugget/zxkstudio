@@ -1,0 +1,16 @@
+{
+  "replace": false,
+  "values": [
+    "minecraft:drowned",
+    "minecraft:guardian",
+    "minecraft:elder_guardian",
+    {
+      "id": "alexscaves:sea_pig",
+      "required": false
+    },
+    {
+      "id": "alexscaves:deep_one",
+      "required": false
+    }
+  ]
+}
