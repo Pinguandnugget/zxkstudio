@@ -23,6 +23,7 @@ public final class ModItems {
 	public static Item SIRENIA_PLANKS;
 	public static Item SIRENIA_LEAVES;
 	public static Item SIRENIA_SEED;
+	public static Item SIRENIA_TREE_SEED;
 	public static Item SIRENIA_FRUIT;
 	public static Item WILTED_SIRENIA_FRUIT;
 	public static Item ROTTEN_SIRENIA_FRUIT;
@@ -36,6 +37,7 @@ public final class ModItems {
 		SIRENIA_LEAVES = block("sirenia_leaves", ModBlocks.SIRENIA_LEAVES);
 
 		SIRENIA_SEED = add("sirenia_seed", new SireniaSeedItem(new Item.Settings().rarity(Rarity.UNCOMMON)));
+		SIRENIA_TREE_SEED = add("sirenia_tree_seed", new com.zxkstudio.sirenia.item.SireniaTreeSeedItem(ModBlocks.SIRENIA_SAPLING, new Item.Settings().rarity(Rarity.UNCOMMON)));
 		SIRENIA_FRUIT = add("sirenia_fruit", new SireniaFruitItem(fruitSettings(4, 0.6f, Rarity.RARE)));
 		WILTED_SIRENIA_FRUIT = add("wilted_sirenia_fruit", new SireniaFruitItem(fruitSettings(2, 0.2f, Rarity.UNCOMMON)));
 		ROTTEN_SIRENIA_FRUIT = add("rotten_sirenia_fruit", new SireniaFruitItem(fruitSettings(1, 0.0f, Rarity.COMMON)));

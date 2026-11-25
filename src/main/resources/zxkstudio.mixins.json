@@ -4,7 +4,8 @@
   "package": "com.zxkstudio.sirenia.mixin.client",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "BackgroundRendererMixin"
+    "BackgroundRendererMixin",
+    "HeartTypeMixin"
   ],
   "injectors": {
     "defaultRequire": 0

@@ -24,7 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * Comportamiento heredado del original (verificado en el bytecode de referencia):
  *  - bajo el agua recupera aire (el original suma 1 por tick y otro procedimiento +7; aquí +7),
- *  - fuera del agua pierde aire y, si se agota, recibe daño periódico (opcional, desactivado por defecto).
+ *  - fuera del agua pierde aire y, si se agota, se ahoga: daño periódico de ahogamiento (configurable).
  *
  * Diferencias a propósito:
  *  - El contador de daño y el "estaba bajo el agua" se guardan POR JUGADOR (el original los guardaba
@@ -80,19 +80,21 @@ public class SirenomorphosisEffect extends StatusEffect {
 		}
 		SireniaConfig cfg = SireniaConfig.get();
 		boolean submerged = entity.isSubmergedIn(FluidTags.WATER);
+		// Nadar en la superficie (cabeza fuera del agua) también permite respirar, si la config lo permite.
+		boolean inWater = submerged || (cfg.land_breathe_when_touching_water && entity.isTouchingWater());
 
-		if (submerged) {
+		if (inWater) {
 			int max = entity.getMaxAir();
 			if (entity.getAir() < max) {
 				entity.setAir(Math.min(max, entity.getAir() + AIR_GAIN_PER_TICK));
 			}
-			if (cfg.underwater_particles_enabled && entity.age % cfg.underwater_particle_interval_ticks == 0) {
-				spawnParticles(world, entity);
-			}
+		}
+		if (submerged && cfg.underwater_particles_enabled && entity.age % cfg.underwater_particle_interval_ticks == 0) {
+			spawnParticles(world, entity);
 		}
 
 		if (cfg.land_penalty_enabled && entity instanceof PlayerEntity player) {
-			landPenalty(world, player, submerged, cfg);
+			landPenalty(world, player, inWater, cfg);
 		}
 		return true;
 	}
@@ -101,7 +103,7 @@ public class SirenomorphosisEffect extends StatusEffect {
 		double x = entity.getX();
 		double y = entity.getBodyY(0.5);
 		double z = entity.getZ();
-		world.spawnParticles(new DustParticleEffect(TURQUOISE, 1.0f), x, y, z, 2, 0.35, 0.5, 0.35, 0.0);
+		world.spawnParticles(new DustParticleEffect(TURQUOISE, 1.1f), x, y, z, 3, 0.4, 0.6, 0.4, 0.0);
 		if (entity.getRandom().nextInt(3) == 0) {
 			world.spawnParticles(ParticleTypes.BUBBLE, x, y + 0.4, z, 1, 0.2, 0.2, 0.2, 0.02);
 		}
@@ -132,7 +134,7 @@ public class SirenomorphosisEffect extends StatusEffect {
 			st.wasUnderwater = false;
 		}
 		if (st.damageTimer <= 0) {
-			player.damage(world.getDamageSources().dryOut(), cfg.land_damage);
+			player.damage(world.getDamageSources().drown(), cfg.land_damage);
 			st.damageTimer = cfg.land_damage_interval_ticks;
 		} else {
 			st.damageTimer--;

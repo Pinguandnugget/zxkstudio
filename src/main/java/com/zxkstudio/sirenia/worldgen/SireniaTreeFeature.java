@@ -9,6 +9,8 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.LeavesBlock;
 import net.minecraft.block.PillarBlock;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.fluid.Fluids;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.registry.tag.BlockTags;
 import net.minecraft.registry.tag.FluidTags;
 import net.minecraft.util.math.BlockPos;
@@ -72,7 +74,7 @@ public class SireniaTreeFeature extends Feature<DefaultFeatureConfig> {
 		for (int attempt = 0; attempt < 6; attempt++) {
 			BlockPos column = origin.add(random.nextInt(9) - 4, 0, random.nextInt(9) - 4);
 			BlockPos ground = kind == Kind.CAVE ? findCaveFloor(world, column) : findSurfaceGround(world, column);
-			if (ground != null && grow(world, random, ground, cfg)) {
+			if (ground != null && grow(world, random, ground, cfg, cfg.require_water_for_generation)) {
 				return true;
 			}
 		}
@@ -162,7 +164,13 @@ public class SireniaTreeFeature extends Feature<DefaultFeatureConfig> {
 
 	// ---------------------------------------------------------------- construcción
 
-	private boolean grow(StructureWorldAccess world, Random random, BlockPos ground, SireniaConfig cfg) {
+	/** Hace crecer un árbol completo desde un brote: {@code ground} es el bloque de barro bajo el brote. */
+	public static boolean growFromSapling(ServerWorld world, Random random, BlockPos ground) {
+		return new SireniaTreeFeature(DefaultFeatureConfig.CODEC, Kind.MANGROVE)
+				.grow(world, random, ground, SireniaConfig.get(), false); // el agua ya la comprobó el brote
+	}
+
+	private boolean grow(StructureWorldAccess world, Random random, BlockPos ground, SireniaConfig cfg, boolean checkWater) {
 		BlockPos base = ground.up();
 		int height = MIN_HEIGHT + random.nextInt(MAX_HEIGHT - MIN_HEIGHT + 1);
 
@@ -179,7 +187,7 @@ public class SireniaTreeFeature extends Feature<DefaultFeatureConfig> {
 				}
 			}
 		}
-		if (cfg.require_water_for_generation && !hasWater(world, base, cfg)) {
+		if (checkWater && !hasWater(world, base, cfg)) {
 			return false;
 		}
 
@@ -291,7 +299,8 @@ public class SireniaTreeFeature extends Feature<DefaultFeatureConfig> {
 		if (world.isOutOfHeightLimit(pos.getY()) || logs.contains(pos) || leaves.contains(pos)) {
 			return;
 		}
-		if (isFree(world.getBlockState(pos))) {
+		BlockState state = world.getBlockState(pos);
+		if (isFree(state) || state.isOf(Blocks.WATER)) { // en el agua las hojas quedan "waterlogged" y brillan
 			leaves.add(pos);
 		}
 	}
@@ -329,7 +338,8 @@ public class SireniaTreeFeature extends Feature<DefaultFeatureConfig> {
 			if (dist >= 7) {
 				continue; // hoja suelta: no se coloca
 			}
-			world.setBlockState(leaf, base.with(LeavesBlock.DISTANCE, dist), Block.NOTIFY_LISTENERS);
+			boolean wet = world.getBlockState(leaf).isOf(Blocks.WATER) && world.getFluidState(leaf).isOf(Fluids.WATER);
+			world.setBlockState(leaf, base.with(LeavesBlock.DISTANCE, dist).with(LeavesBlock.WATERLOGGED, wet), Block.NOTIFY_LISTENERS);
 		}
 	}
 }

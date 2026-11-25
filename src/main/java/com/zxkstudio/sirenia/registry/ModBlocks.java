@@ -27,6 +27,8 @@ public final class ModBlocks {
 	public static Block SIRENIA_LEAVES;
 	/** Injerto/fruto que crece pegado al costado de un tronco pelado (no tiene ítem). */
 	public static Block SIRENIA_GRAFT;
+	/** Brote del Árbol de Sirenia (crece sobre barro con agua cerca). */
+	public static Block SIRENIA_SAPLING;
 
 	public static void register() {
 		SIRENIA_LOG = add("sirenia_log", new PillarBlock(logSettings(MapColor.BLUE)));
@@ -44,9 +46,18 @@ public final class ModBlocks {
 				.ticksRandomly()
 				.sounds(BlockSoundGroup.GRASS)
 				.nonOpaque()
+				.luminance(state -> state.get(LeavesBlock.WATERLOGGED) ? 11 : 0) // brillan al estar en el agua
 				.allowsSpawning((state, world, pos, type) -> type == EntityType.OCELOT || type == EntityType.PARROT)
 				.suffocates((state, world, pos) -> false)
 				.blockVision((state, world, pos) -> false)));
+		SIRENIA_SAPLING = add("sirenia_sapling", new com.zxkstudio.sirenia.block.SireniaSaplingBlock(AbstractBlock.Settings.create()
+				.mapColor(MapColor.EMERALD_GREEN)
+				.breakInstantly()
+				.nonOpaque()
+				.ticksRandomly()
+				.luminance(state -> 3)
+				.pistonBehavior(PistonBehavior.DESTROY)
+				.sounds(BlockSoundGroup.MANGROVE_ROOTS)));
 		SIRENIA_GRAFT = add("sirenia_graft", new SireniaGraftBlock(AbstractBlock.Settings.create()
 				.mapColor(MapColor.TEAL)
 				.strength(0.3f)

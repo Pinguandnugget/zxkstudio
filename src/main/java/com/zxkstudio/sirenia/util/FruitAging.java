@@ -9,11 +9,10 @@ import net.minecraft.item.ItemStack;
 /**
  * Caducidad de los frutos ya cosechados.
  *
- * Cada fruto guarda en el componente zxkstudio:birth_time el instante (milisegundos reales,
- * redondeado al minuto) en que "nació" el injerto. El estado se calcula siempre a partir de ese
- * dato, así que no depende de dónde esté el objeto (inventario, cofre, barril, shulker, mochila...)
- * ni se reinicia al dividir stacks o moverlo. Frutos con fechas distintas no se apilan porque el
- * componente es distinto.
+ * Cada fruto guarda en el componente zxkstudio:fruit_clock el instante (milisegundos reales) en que
+ * "nació" el injerto. El estado se calcula siempre a partir de ese dato, así que no depende de dónde esté
+ * el objeto (inventario, cofre, barril, shulker, mochila...) ni se reinicia al dividir stacks o moverlo.
+ * Los frutos de la misma fase se apilan entre sí (ver FruitClock); los de fases distintas no.
  */
 public final class FruitAging {
 	public static final int MATURE = 2;
@@ -67,9 +66,13 @@ public final class FruitAging {
 
 	/** Instante de nacimiento; si el objeto no lo tiene (creativo, /give) se deduce del estado del ID. */
 	public static long birthMs(ItemStack stack, long now) {
-		Long stored = stack.get(ModComponents.BIRTH_TIME);
-		if (stored != null) {
-			return stored;
+		FruitClock clock = stack.get(ModComponents.FRUIT_CLOCK);
+		if (clock != null) {
+			return clock.birthMs();
+		}
+		Long legacy = stack.get(ModComponents.BIRTH_TIME); // frutos de la primera versión
+		if (legacy != null) {
+			return legacy;
 		}
 		SireniaConfig c = SireniaConfig.get();
 		long ticks = switch (stageOfItem(stack.getItem())) {
@@ -101,18 +104,23 @@ public final class FruitAging {
 		return Math.max(1L, (target - ageTicks) / 1200L);
 	}
 
-	/** Da al objeto su fecha de nacimiento si todavía no la tiene. */
+	/** Da al objeto su reloj si todavía no lo tiene (o migra el componente antiguo). */
 	public static void ensureBirth(ItemStack stack, long now) {
-		if (!stack.contains(ModComponents.BIRTH_TIME)) {
-			stack.set(ModComponents.BIRTH_TIME, birthMs(stack, now));
+		if (!stack.contains(ModComponents.FRUIT_CLOCK)) {
+			stack.set(ModComponents.FRUIT_CLOCK, new FruitClock(birthMs(stack, now)));
+			stack.remove(ModComponents.BIRTH_TIME);
 		}
+	}
+
+	/** Copia el reloj de un fruto a otro (al cambiar de ID por la fase). */
+	public static void copyClock(ItemStack from, ItemStack to, long now) {
+		to.set(ModComponents.FRUIT_CLOCK, new FruitClock(birthMs(from, now)));
 	}
 
 	/** Crea el fruto cosechado de un injerto con ese tiempo de crecimiento (en ticks cargados). */
 	public static ItemStack harvested(int stage, long growthTicks) {
 		ItemStack stack = new ItemStack(itemForStage(stage));
-		long now = nowMs();
-		stack.set(ModComponents.BIRTH_TIME, quantize(now - growthTicks * 50L));
+		stack.set(ModComponents.FRUIT_CLOCK, new FruitClock(nowMs() - growthTicks * 50L));
 		return stack;
 	}
 }
