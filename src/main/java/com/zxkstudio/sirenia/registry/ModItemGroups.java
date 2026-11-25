@@ -26,6 +26,7 @@ public final class ModItemGroups {
 						.entries((context, entries) -> {
 							// Sirenia
 							entries.add(ModItems.SIRENIA_SEED);
+							entries.add(ModItems.SIRENIA_TREE_SEED);
 							entries.add(ModItems.SIRENIA_FRUIT);
 							entries.add(ModItems.WILTED_SIRENIA_FRUIT);
 							entries.add(ModItems.ROTTEN_SIRENIA_FRUIT);

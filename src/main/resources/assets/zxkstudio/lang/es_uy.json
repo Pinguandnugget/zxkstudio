@@ -58,5 +58,13 @@
   "block.zxkstudio.sirenia_planks.desc1": "Tablones de la madera de Sirenia.",
   "block.zxkstudio.sirenia_leaves.desc1": "Hojas verde azuladas del Árbol de Sirenia.",
   "block.zxkstudio.sirenia_leaves.desc2": "Con suerte sueltan un Germen de Sirenia.",
-  "effect.zxkstudio.thalassophobia": "Talasofobia"
+  "effect.zxkstudio.thalassophobia": "Talasofobia",
+  "item.zxkstudio.sirenia_tree_seed": "Semilla de Sirenia",
+  "block.zxkstudio.sirenia_sapling": "Brote de Sirenia",
+  "item.zxkstudio.sirenia_tree_seed.desc1": "Semilla del Árbol de Sirenia.",
+  "item.zxkstudio.sirenia_tree_seed.desc2": "Se planta sobre barro con agua cerca (sin agua encima).",
+  "item.zxkstudio.sirenia_tree_seed.desc3": "Se obtiene partiendo un fruto: fruto en una mano, hacha en la otra y clic derecho.",
+  "message.zxkstudio.sapling.fail.no_mud": "El brote necesita barro debajo",
+  "message.zxkstudio.sapling.fail.in_water": "El brote no se puede plantar dentro del agua",
+  "message.zxkstudio.sapling.fail.no_water": "Faltan bloques de agua cerca del brote"
 }

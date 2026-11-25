@@ -187,3 +187,10 @@ Apagada por defecto. Un operador la activa con `/talasofobia on` (y `off`); tamb
 
 Todo lo falso solo lo ve el jugador afectado y no hay entidades reales (el "tiburón" son paquetes con el modelo del delfín).
 Se ajusta con las opciones `thalassophobia_*` del archivo de configuración.
+
+## Semilla y brote del Árbol de Sirenia
+
+- **Semilla de Sirenia** (`zxkstudio:sirenia_tree_seed`): se consigue con el fruto en una mano, un hacha en la otra y clic derecho. Da 2-3 semillas y gasta 1 fruto y 1 de durabilidad del hacha.
+- **Brote de Sirenia**: se planta con la semilla sobre **barro**, sin agua encima y con **agua cerca** (mismas reglas `required_water_blocks` / `water_detection_radius` del cultivo). Crece en 3 fases con ticks aleatorios (o polvo de hueso) y, al final, se convierte en un Árbol de Sirenia si hay sitio libre. Si el sitio deja de cumplir, solo se pausa.
+- Las **hojas de Sirenia brillan** (luz 11) cuando están en el agua (waterlogged).
+- Config (`config/zxkstudio_sirenia.json`): `tree_seed_min`, `tree_seed_max`, `sapling_growth_chance`.

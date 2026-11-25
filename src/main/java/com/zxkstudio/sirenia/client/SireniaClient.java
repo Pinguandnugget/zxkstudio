@@ -32,6 +32,7 @@ public class SireniaClient implements ClientModInitializer {
 	public void onInitializeClient() {
 		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SIRENIA_LEAVES, RenderLayer.getCutoutMipped());
 		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SIRENIA_GRAFT, RenderLayer.getCutout());
+		BlockRenderLayerMap.INSTANCE.putBlock(ModBlocks.SIRENIA_SAPLING, RenderLayer.getCutout());
 
 		// El modelo del fruto se elige con su edad real, así un fruto guardado en un cofre se ve marchito
 		// o podrido aunque su ID todavía no se haya actualizado.

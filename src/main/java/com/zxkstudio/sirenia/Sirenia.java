@@ -47,6 +47,7 @@ public final class Sirenia {
 
 		SirenomorphosisEvents.register();
 		SireniaRot.register();
+		com.zxkstudio.sirenia.effect.FruitSplitEvents.register();
 		Thalassophobia.register();
 		ThalassophobiaCommand.register();
 		SireniaWorldgen.register();

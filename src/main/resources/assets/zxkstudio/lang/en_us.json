@@ -58,5 +58,13 @@
   "block.zxkstudio.sirenia_planks.desc1": "Planks made from Sirenia wood.",
   "block.zxkstudio.sirenia_leaves.desc1": "Blue-green leaves of the Sirenia Tree.",
   "block.zxkstudio.sirenia_leaves.desc2": "With luck they drop a Sirenia Germ.",
-  "effect.zxkstudio.thalassophobia": "Thalassophobia"
+  "effect.zxkstudio.thalassophobia": "Thalassophobia",
+  "item.zxkstudio.sirenia_tree_seed": "Sirenia Seed",
+  "block.zxkstudio.sirenia_sapling": "Sirenia Sapling",
+  "item.zxkstudio.sirenia_tree_seed.desc1": "Seed of the Sirenia Tree.",
+  "item.zxkstudio.sirenia_tree_seed.desc2": "Plant it on mud with water nearby (not inside water).",
+  "item.zxkstudio.sirenia_tree_seed.desc3": "Get it by splitting a fruit: fruit in one hand, axe in the other, right-click.",
+  "message.zxkstudio.sapling.fail.no_mud": "The sapling needs mud underneath",
+  "message.zxkstudio.sapling.fail.in_water": "The sapling can't be planted inside water",
+  "message.zxkstudio.sapling.fail.no_water": "Not enough water near the sapling"
 }

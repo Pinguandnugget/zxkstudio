@@ -34,6 +34,11 @@ public final class SireniaConfig {
 	public int water_detection_radius = 3;
 	/** Probabilidad (0 a 1) de que un fruto maduro cosechado dé un Germen extra. */
 	public double seed_bonus_chance = 0.25;
+	/** Semillas del árbol que da un fruto al partirlo con hacha (mínimo y máximo, ambos incluidos). */
+	public int tree_seed_min = 2;
+	public int tree_seed_max = 3;
+	/** El brote crece de fase con probabilidad 1/N en cada tick aleatorio (si el sitio es válido). */
+	public int sapling_growth_chance = 6;
 
 	// ---- Efectos de los frutos ----
 	public int sirenomorphosis_duration_seconds = 180;
@@ -157,6 +162,9 @@ public final class SireniaConfig {
 		fruit_rot_minutes = clamp(fruit_rot_minutes, fruit_wilt_minutes + 1, 100000);
 		bone_meal_required = clamp(bone_meal_required, 1, 64);
 		required_water_blocks = clamp(required_water_blocks, 0, 200);
+		tree_seed_min = clamp(tree_seed_min, 1, 16);
+		tree_seed_max = clamp(tree_seed_max, tree_seed_min, 16);
+		sapling_growth_chance = clamp(sapling_growth_chance, 1, 1000);
 		water_detection_radius = clamp(water_detection_radius, 1, 6);
 		seed_bonus_chance = Math.max(0.0, Math.min(1.0, seed_bonus_chance));
 		sirenomorphosis_duration_seconds = clamp(sirenomorphosis_duration_seconds, 1, 86400);
