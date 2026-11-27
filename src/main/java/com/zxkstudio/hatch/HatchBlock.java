@@ -8,6 +8,9 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.*;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ItemActionResult;
+import net.minecraft.util.Hand;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.math.*;
 import net.minecraft.util.shape.*;
@@ -115,6 +118,10 @@ public final class HatchBlock extends BlockWithEntity {
     @Override protected void onStateReplaced(BlockState state, World world, BlockPos pos, BlockState replacement, boolean moved) {
         if(world instanceof ServerWorld server && !replacement.isOf(this)) removeAssembly(server,center(pos,state),state.get(FACING));
         super.onStateReplaced(state,world,pos,replacement,moved);
+    }
+    @Override protected ItemActionResult onUseWithItem(ItemStack stack, BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockHitResult hit) {
+        if(hand==Hand.MAIN_HAND) return ItemActionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return ItemActionResult.SKIP_DEFAULT_BLOCK_INTERACTION;
     }
     @Override protected ActionResult onUse(BlockState state, World world, BlockPos pos, PlayerEntity player, BlockHitResult hit) {
         if(!world.isClient && !player.isSpectator()) {

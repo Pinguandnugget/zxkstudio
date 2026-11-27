@@ -1,6 +1,6 @@
-# Escotilla Abisal V4 (Fabric 1.21.1)
+# Escotilla Abisal V5 (Fabric 1.21.1)
 
-Puerta circular mural de 3 × 3 bloques, modelo original de 266 piezas, textura militar integrada y dos paneles que se desplazan en direcciones opuestas. La animación dura 32 ticks (1,6 segundos a 20 TPS).
+Puerta mural de 3 × 3 bloques con blindaje exterior cuadrado y abertura circular, modelo original de 266 piezas más placas de acero, textura militar integrada y dos paneles que se desplazan en direcciones opuestas. La animación dura 32 ticks (1,6 segundos a 20 TPS).
 
 ## Instalación y uso
 
@@ -17,15 +17,16 @@ Los comandos exigen permiso de operador nivel 2. Una vez instalada, cualquiera p
 
 ## Modo grupal
 
-1. Espera cerrada hasta que exista al menos un jugador en supervivencia conectado y **todos** los jugadores en supervivencia del servidor estén vivos, en la misma dimensión y dentro del radio esférico de 30 bloques.
+1. Espera cerrada hasta que exista al menos un jugador en supervivencia conectado y **todos** los jugadores en supervivencia del servidor estén vivos, en la misma dimensión y dentro del radio esférico de 10 bloques.
+   Un superviviente debe hacer clic derecho cuando todos estén reunidos; no abre automáticamente. Un clic prematuro no queda en cola.
 2. Captura los UUID de ese grupo al abrir. Creativo, aventura y espectador no cuentan. Jugadores que se conecten después no se incorporan al grupo ya iniciado. Cada miembro debe atravesar físicamente la entrada desde el exterior hacia el interior.
-3. Cuando todos hayan cruzado y estén a suficiente distancia del umbral por el lado interior, comienza el cierre. Si alguno vuelve al exterior antes del cierre, se reabre. Si hay una entidad viva en el plano, se evita cerrar sobre ella.
+3. Cuando todos hayan cruzado y estén a suficiente distancia del umbral por el lado interior, comienza el cierre. Si alguno vuelve al exterior antes del cierre, se reabre. Si hay un jugador en el plano, se evita cerrar sobre él; los mobs no mantienen la puerta abierta indefinidamente.
 4. Al terminar, queda sellada permanentemente en modo de evento; su estado se guarda en el mundo. Desconectar, morir o cambiar de modo durante el acceso no elimina al participante ni provoca un sellado prematuro. Un operador puede recuperar el acceso mediante el modo manual.
 
 ## Pruebas de integración pendientes en Minecraft
 
 - Colocar las cuatro orientaciones, comprobar el modelo/textura y que ambos paneles se alejan del centro.
-- Dos supervivientes: uno a 31 bloques, otro cerca (no abre); ambos dentro de 30 (abre); solo uno entra (no cierra); ambos entran (sella).
+- Dos supervivientes: uno a 11 bloques, otro cerca (no abre); ambos dentro de 10 (no abre hasta hacer clic derecho); solo uno entra (no cierra); ambos entran (sella).
 - Un creativo y un espectador lejos no impiden iniciar el evento.
 - Volver al exterior antes de terminar el cierre, obstruir con un jugador, desconectar y volver a conectar.
 - Reiniciar el servidor con puerta abierta/sellada, activar modo manual, abrir y cerrar.

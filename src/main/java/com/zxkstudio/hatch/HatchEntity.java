@@ -20,6 +20,7 @@ import java.util.*;
 
 public final class HatchEntity extends BlockEntity {
     public static final int DURATION=32;
+    public static final double GROUP_RADIUS=10.0;
     private enum Mode { WAITING, ACTIVE, LOCKED, MANUAL }
     private Mode mode=Mode.WAITING;
     private final Set<UUID> group=new HashSet<>();
@@ -58,7 +59,6 @@ public final class HatchEntity extends BlockEntity {
         int oldProgress=progress;
         boolean oldMotion=motionOpen;
         boolean desired=false;
-        if(mode==Mode.WAITING && progress==0 && world.getTime()%10==0) tryStart(world);
         if(mode==Mode.ACTIVE) {
             if(progress==DURATION) openedOnce=true;
             boolean everybodyInside=checkCrossings(world);
@@ -66,7 +66,7 @@ public final class HatchEntity extends BlockEntity {
         } else if(mode==Mode.MANUAL) desired=manualOpen;
 
         // Never begin or finish a close while a living entity occupies the opening.
-        boolean blocked=!desired && progress>0 && obstructed(world,pos,facing);
+        boolean blocked=!desired && progress>0 && playerObstructed(world,pos,facing);
         motionOpen=desired || blocked;
         if(motionOpen) progress=Math.min(DURATION,progress+1);
         else progress=Math.max(0,progress-1);
@@ -98,11 +98,17 @@ public final class HatchEntity extends BlockEntity {
         if(oldProgress!=progress || oldMode!=mode || oldMotion!=motionOpen) sync(world);
     }
 
-    private void tryStart(ServerWorld world) {
+    private void tryStart(ServerWorld world, ServerPlayerEntity initiator) {
         List<ServerPlayerEntity> players=world.getServer().getPlayerManager().getPlayerList().stream().filter(HatchEntity::survival).toList();
-        if(players.isEmpty()) return;
-        for(ServerPlayerEntity p:players) {
-            if(p.getWorld()!=world || !p.isAlive() || p.getPos().squaredDistanceTo(Vec3d.ofCenter(pos))>900.0) return;
+        if(progress!=0 || !survival(initiator) || !initiator.isAlive()) {
+            initiator.sendMessage(Text.literal("§7Escotilla: solo un jugador en supervivencia puede iniciar el acceso cuando está cerrada."),true);
+            return;
+        }
+        if(!HatchBlock.loaded(world,pos,facing())) return;
+        long nearby=players.stream().filter(p->p.getWorld()==world && p.isAlive() && p.getPos().squaredDistanceTo(Vec3d.ofCenter(pos))<=GROUP_RADIUS*GROUP_RADIUS).count();
+        if(players.isEmpty() || nearby!=players.size()) {
+            initiator.sendMessage(Text.literal("§7[Escotilla] §eGrupo incompleto: "+nearby+"/"+players.size()+" supervivientes a 10 bloques."),true);
+            return;
         }
         group.clear(); entered.clear(); previous.clear();
         for(ServerPlayerEntity p:players) {
@@ -152,11 +158,21 @@ public final class HatchEntity extends BlockEntity {
         return !world.getOtherEntities(null,area,e->e instanceof LivingEntity && e.isAlive() && !e.isSpectator()).isEmpty();
     }
 
+    private static boolean playerObstructed(ServerWorld world,BlockPos pos,Direction facing) {
+        Vec3d c=Vec3d.ofCenter(pos);
+        boolean z=facing.getAxis()==Direction.Axis.Z;
+        double dx=z?1.55:0.62, dz=z?0.62:1.55;
+        Box area=new Box(c.x-dx,c.y-1.55,c.z-dz,c.x+dx,c.y+1.55,c.z+dz);
+        return !world.getOtherEntities(null,area,entity->entity instanceof PlayerEntity && entity.isAlive() && !entity.isSpectator()).isEmpty();
+    }
+
     public void interact(PlayerEntity p) {
         if(mode==Mode.MANUAL) {
             manualOpen=!manualOpen;
             markDirty();
             p.sendMessage(Text.literal(manualOpen?"§7Escotilla: abriendo.":"§7Escotilla: cerrando."),true);
+        } else if(mode==Mode.WAITING && p instanceof ServerPlayerEntity initiator && world instanceof ServerWorld server) {
+            tryStart(server,initiator);
         } else p.sendMessage(Text.literal(status()),true);
     }
     public void setManual() {
@@ -172,7 +188,7 @@ public final class HatchEntity extends BlockEntity {
     }
     public String status() {
         return switch(mode) {
-            case WAITING -> "Escotilla: esperando a todos los jugadores en supervivencia (30 bloques).";
+            case WAITING -> "Escotilla: esperando a todos los jugadores en supervivencia (10 bloques) y clic derecho.";
             case ACTIVE -> "Escotilla: acceso grupal. Entradas registradas "+entered.size()+"/"+group.size()+".";
             case LOCKED -> "Escotilla: sellada definitivamente. Un administrador puede activar el modo manual.";
             case MANUAL -> "Escotilla: modo manual. Clic derecho para abrir/cerrar.";

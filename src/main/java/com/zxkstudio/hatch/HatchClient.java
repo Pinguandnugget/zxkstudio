@@ -44,7 +44,8 @@ public final class HatchClient implements ClientModInitializer {
                 if(group.side()!=0) matrices.translate(group.side()*slide,0,depth);
                 MatrixStack.Entry matrix=matrices.peek();
                 for(Vertex v:group.vertices()) {
-                    buffer.vertex(matrix,v.x(),v.y(),v.z()).color(255,255,255,255)
+                    float vx=group.side()==0?v.x():Math.max(-1.5f-group.side()*slide,Math.min(1.5f-group.side()*slide,v.x()));
+                    buffer.vertex(matrix,vx,v.y(),v.z()).color(255,255,255,255)
                         .texture(v.u(),v.v()).overlay(overlay).light(light)
                         .normal(matrix,v.nx(),v.ny(),v.nz());
                 }
