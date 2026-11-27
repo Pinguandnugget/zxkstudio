@@ -1,0 +1,11 @@
+{
+  "required": true,
+  "package": "zxk.leviathan.client.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "LeviathanBossHudMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
