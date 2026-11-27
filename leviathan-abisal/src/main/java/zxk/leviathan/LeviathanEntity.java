@@ -27,7 +27,7 @@ public class LeviathanEntity extends HostileEntity implements GeoEntity {
  private final ServerBossBar bar=new ServerBossBar(Text.translatable("boss.leviathan_abisal.leviathan"),BossBar.Color.BLUE,BossBar.Style.PROGRESS);
  private double hp=LeviathanMod.CONFIG.maxHealth;
  private int phase=1, time=0, cooldown=20; private String action="";
- private boolean dying=false; private UUID victim;
+ private boolean dying=false; private UUID victim; private boolean captured;
  private static final TrackedData<String> ANIMATION = DataTracker.registerData(LeviathanEntity.class, TrackedDataHandlerRegistry.STRING);
  private static final RawAnimation IDLE = RawAnimation.begin().thenLoop("animation.leviathan_abisal.idle");
  private static final String PREFIX="animation.leviathan_abisal.";
@@ -56,10 +56,21 @@ public class LeviathanEntity extends HostileEntity implements GeoEntity {
    }
   }
  }
- private void start(String name,int ticks){action=name;time=0;duration=ticks;getDataTracker().set(ANIMATION,name);}
- private void resetAction(){action="";victim=null;getDataTracker().set(ANIMATION,"idle");cooldown=phase==3?40:80;}
+ private void start(String name,int ticks){captured=false;action=name;time=0;duration=ticks;getDataTracker().set(ANIMATION,name);}
+ private void resetAction(){captured=false;action="";victim=null;getDataTracker().set(ANIMATION,"idle");cooldown=phase==3?40:80;}
  private ServerPlayerEntity resolveVictim(){if(victim==null||!(getWorld() instanceof ServerWorld sw))return null;var p=sw.getServer().getPlayerManager().getPlayer(victim);return p!=null&&p.isAlive()&&!p.isRemoved()&&p.getWorld()==sw&&!p.isCreative()&&!p.isSpectator()&&squaredDistanceTo(p)<=900?p:null;}
- private void biteTick(){if(time<30||time>=230)return;var p=resolveVictim();if(p==null){victim=null;return;}if(time>=60&&time<=210&&(time-60)%30==0){float amount=Math.min(10000f,Math.max(40f,(p.getHealth()+p.getAbsorptionAmount())*4f));p.damage(getDamageSources().mobAttack(this),amount);if(!p.isAlive()||p.isRemoved())victim=null;}}
+ private void biteTick(){
+  if(time<30||time>=230){captured=false;return;}
+  var p=resolveVictim();if(p==null){victim=null;captured=false;return;}
+  Vec3d mouth=BiteSocket.position(this,time);
+  if(time==30){captured=p.getPos().add(0,0.9,0).distanceTo(mouth)<7;}
+  if(!captured)return;
+  Vec3d target=mouth.add(0,-0.9,0);
+  if(!getWorld().isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos())))){captured=false;victim=null;return;}
+  p.networkHandler.requestTeleport(target.x,target.y,target.z,p.getYaw(),p.getPitch());
+  p.setVelocity(Vec3d.ZERO);p.velocityModified=true;p.fallDistance=0;
+  if(time>=60&&time<=210&&(time-60)%30==0){float amount=Math.min(10000f,Math.max(40f,(p.getHealth()+p.getAbsorptionAmount())*4f));p.damage(getDamageSources().mobAttack(this),amount);if(!p.isAlive()||p.isRemoved()){victim=null;captured=false;}}
+ }
  @Override public void tick(){super.tick();if(getWorld().isClient)return;setVelocity(0,0,0);if(!action.isEmpty()){time++;if(action.equals("attack_bite"))biteTick();else attackEffects();if(time>=duration){if(dying){bar.clearPlayers();discard();return;}resetAction();}return;}int next=hp/LeviathanMod.CONFIG.maxHealth<=LeviathanMod.CONFIG.phase3Threshold?3:hp/LeviathanMod.CONFIG.maxHealth<=LeviathanMod.CONFIG.phase2Threshold?2:1;if(next>phase){phase=next;start("phase_transition",160);return;}if(cooldown-->0)return;PlayerEntity target=getWorld().getClosestPlayer(this,30);if(target instanceof ServerPlayerEntity player&&!player.isCreative()&&!player.isSpectator()){int i=random.nextInt(phase==1?3:7);int idx=phase==1?new int[]{0,2,3}[i]:i;if(phase>=2&&random.nextInt(5)==0&&getWorld() instanceof ServerWorld sw&&TsunamiAttack.start(sw,getPos())){start("attack_pressure_roar",120);return;}victim=player.getUuid();start(ATTACKS[idx],LENGTHS[idx]);}}
  @Override public void onStartedTrackingBy(ServerPlayerEntity p){super.onStartedTrackingBy(p);bar.addPlayer(p);bar.setPercent((float)(hp/LeviathanMod.CONFIG.maxHealth));}
  @Override public void onStoppedTrackingBy(ServerPlayerEntity p){super.onStoppedTrackingBy(p);bar.removePlayer(p);}
