@@ -12,14 +12,20 @@ import net.minecraft.util.math.Vec3d;
 import static net.minecraft.server.command.CommandManager.literal;
 
 public final class TsunamiAttack {
-    private record Active(ServerWorld world,RadialWave wave){}
+    private record Active(ServerWorld world,RadialWave wave,WaveVisualEntity visual){}
     private record Pulse(ServerWorld world,java.util.UUID player,long tick){}
     private static final ArrayList<Active> WAVES=new ArrayList<>();
     private static final ArrayList<Pulse> PULSES=new ArrayList<>();
     private static long clock;
     public static boolean start(ServerWorld world,Vec3d floor){
         if(WAVES.stream().anyMatch(a->a.world()==world&&a.wave().origin().distanceTo(floor)<200))return false;
-        WAVES.add(new Active(world,new RadialWave(floor,100,8,.5)));
+        WaveVisualEntity visual=null;
+        if(TsunamiAttack.class.getResource("/assets/leviathan_abisal/geo/tsunami.geo.json")!=null && TsunamiAttack.class.getResource("/assets/leviathan_abisal/textures/entity/tsunami.png")!=null && TsunamiAttack.class.getResource("/assets/leviathan_abisal/animations/tsunami.animation.json")!=null){
+            visual=zxk.leviathan.LeviathanMod.WAVE.create(world);
+            if(visual!=null){visual.refreshPositionAndAngles(floor.x,floor.y,floor.z,0,0);if(!world.spawnEntity(visual))visual=null;}
+        }
+        WAVES.add(new Active(world,new RadialWave(floor,100,8,.5),visual));
+        world.playSound(null,net.minecraft.util.math.BlockPos.ofFloored(floor),zxk.leviathan.LeviathanSounds.roar(),net.minecraft.sound.SoundCategory.HOSTILE,5f,.9f);
         for(var p:world.getPlayers())if(p.getPos().squaredDistanceTo(floor)<110*110)p.sendMessage(Text.literal("¡TSUNAMI ABISAL! Busca un ancla elevada."),true);
         return true;
     }
@@ -46,7 +52,7 @@ public final class TsunamiAttack {
             var a=it.next();var w=a.wave();
             boolean running=w.tick(a.world(),p->impact(p,a.world()));
             // Lightweight diagnostic effect; the approved V5 renderer replaces this later.
-            if(w.age()%4==0){
+            if((a.visual()==null||a.visual().isRemoved())&&w.age()%4==0){
                 double r=w.age()<=80?3:w.front();
                 for(var p:a.world().getPlayers()){
                     double dx=p.getX()-w.origin().x,dz=p.getZ()-w.origin().z;
