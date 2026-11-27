@@ -66,5 +66,7 @@
   "item.zxkstudio.sirenia_tree_seed.desc3": "Se obtiene partiendo un fruto: fruto en una mano, hacha en la otra y clic derecho.",
   "message.zxkstudio.sapling.fail.no_mud": "El brote necesita barro debajo",
   "message.zxkstudio.sapling.fail.in_water": "El brote no se puede plantar dentro del agua",
-  "message.zxkstudio.sapling.fail.no_water": "Faltan bloques de agua cerca del brote"
+  "message.zxkstudio.sapling.fail.no_water": "Faltan bloques de agua cerca del brote",
+  "item.zxkstudio.escotilla_abisal": "Escotilla Abisal",
+  "block.zxkstudio.escotilla_abisal": "Escotilla Abisal"
 }

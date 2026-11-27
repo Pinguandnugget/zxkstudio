@@ -66,5 +66,7 @@
   "item.zxkstudio.sirenia_tree_seed.desc3": "Get it by splitting a fruit: fruit in one hand, axe in the other, right-click.",
   "message.zxkstudio.sapling.fail.no_mud": "The sapling needs mud underneath",
   "message.zxkstudio.sapling.fail.in_water": "The sapling can't be planted inside water",
-  "message.zxkstudio.sapling.fail.no_water": "Not enough water near the sapling"
+  "message.zxkstudio.sapling.fail.no_water": "Not enough water near the sapling",
+  "item.zxkstudio.escotilla_abisal": "Abyssal Hatch",
+  "block.zxkstudio.escotilla_abisal": "Abyssal Hatch"
 }

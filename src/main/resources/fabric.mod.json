@@ -4,14 +4,26 @@
   "version": "${version}",
   "name": "zxkstudio",
   "description": "Contenido de zxkstudio. Incluye Sangre Jurásica (infección por dinosaurios, antídoto de ámbar) y Cyberpsychosis (inmunosupresores, bajas), con comandos para ajustarlo todo. Incluye PotitoSirenia: Árbol de Sirenia, Corazón de Sirenia y el efecto Sirenomorphosis.",
-  "authors": ["zxkstudio"],
+  "authors": [
+    "zxkstudio"
+  ],
   "license": "All-Rights-Reserved",
   "environment": "*",
   "entrypoints": {
-    "main": ["com.zxkstudio.ZxkStudio", "com.zxkstudio.rings.Rings"],
-    "client": ["com.zxkstudio.sirenia.client.SireniaClient"]
+    "main": [
+      "com.zxkstudio.ZxkStudio",
+      "com.zxkstudio.rings.Rings",
+      "com.zxkstudio.hatch.Hatches"
+    ],
+    "client": [
+      "com.zxkstudio.sirenia.client.SireniaClient",
+      "com.zxkstudio.hatch.HatchClient"
+    ]
   },
-  "mixins": ["zxkstudio.mixins.json", "zxkstudio.rings.mixins.json"],
+  "mixins": [
+    "zxkstudio.mixins.json",
+    "zxkstudio.rings.mixins.json"
+  ],
   "depends": {
     "fabricloader": ">=0.16.0",
     "minecraft": "~1.21.1",
