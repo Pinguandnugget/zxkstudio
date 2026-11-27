@@ -1,1 +1,5 @@
-{"item.leviathan_abisal.abyssal_grapple":"Caña de anclaje abisal","block.leviathan_abisal.emergency_anchor":"Ancla de emergencia"}
+{
+  "item.leviathan_abisal.abyssal_grapple": "Caña de anclaje abisal",
+  "block.leviathan_abisal.emergency_anchor": "Ancla de emergencia",
+  "boss.leviathan_abisal.leviathan": "Leviathan Abisal"
+}

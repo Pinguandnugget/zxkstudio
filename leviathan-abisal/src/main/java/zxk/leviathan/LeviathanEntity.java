@@ -15,7 +15,7 @@ import software.bernie.geckolib.animation.*;
 import software.bernie.geckolib.util.GeckoLibUtil;
 public class LeviathanEntity extends HostileEntity implements GeoEntity {
  private final AnimatableInstanceCache cache=GeckoLibUtil.createInstanceCache(this);
- private final ServerBossBar bar=new ServerBossBar(Text.literal("Leviathan Abisal"),BossBar.Color.BLUE,BossBar.Style.PROGRESS);
+ private final ServerBossBar bar=new ServerBossBar(Text.translatable("boss.leviathan_abisal.leviathan"),BossBar.Color.BLUE,BossBar.Style.PROGRESS);
  private double hp=LeviathanMod.CONFIG.maxHealth;
  private int phase=1, time=0, cooldown=20; private String action="";
  private boolean dying=false; private ServerPlayerEntity victim;
