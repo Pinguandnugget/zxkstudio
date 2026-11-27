@@ -34,7 +34,8 @@ public final class GrappleRod extends Item {
             p.sendMessage(Text.literal("Apunta a un ancla de emergencia."),true);return TypedActionResult.fail(stack);
         }
         Vec3d target=GrappleMotion.target(p.getPos(),Vec3d.ofCenter(hit.getBlockPos()));
-        if(target==null||!world.isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos())))){
+        if(target!=null){ while(target.y>p.getY()+2 && !world.isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos()))))target=target.add(0,-0.5,0); }
+        if(target==null||target.y<=p.getY()+2||!world.isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos())))){
             p.sendMessage(Text.literal("Ancla fuera de alcance o ascenso obstruido."),true);return TypedActionResult.fail(stack);
         }
         LANDING.remove(p.getUuid());
