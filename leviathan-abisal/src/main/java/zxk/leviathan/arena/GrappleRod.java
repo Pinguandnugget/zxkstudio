@@ -19,6 +19,8 @@ import net.minecraft.world.World;
 
 public final class GrappleRod extends Item {
     private record Session(ServerWorld world, BlockPos anchor, Vec3d target, int age, int held){}
+    private record Landing(ServerWorld world,int ticks){}
+    private static final HashMap<UUID,Landing> LANDING=new HashMap<>();
     private static final HashMap<UUID,Session> ACTIVE = new HashMap<>();
     public GrappleRod(Settings settings){super(settings);}
     @Override public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand){
@@ -35,6 +37,7 @@ public final class GrappleRod extends Item {
         if(target==null||!world.isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos())))){
             p.sendMessage(Text.literal("Ancla fuera de alcance o ascenso obstruido."),true);return TypedActionResult.fail(stack);
         }
+        LANDING.remove(p.getUuid());
         ACTIVE.put(p.getUuid(),new Session(sw,hit.getBlockPos(),target,0,0));
         p.sendMessage(Text.literal("Anclaje activado"),true);
         return TypedActionResult.success(stack);
@@ -42,9 +45,18 @@ public final class GrappleRod extends Item {
     private static void release(ServerPlayerEntity p){
         p.getItemCooldownManager().set(GrappleItems.ROD,GrappleMotion.COOLDOWN_TICKS);
         p.fallDistance=0;
+        LANDING.put(p.getUuid(),new Landing(p.getServerWorld(),100));
         p.setVelocity(Vec3d.ZERO);p.velocityModified=true;
     }
     public static void tick(MinecraftServer server){
+        var land=LANDING.entrySet().iterator();
+        while(land.hasNext()){
+            var e=land.next();var p=server.getPlayerManager().getPlayer(e.getKey());var l=e.getValue();
+            if(p==null||!p.isAlive()||p.getWorld()!=l.world()||l.ticks()<=0){land.remove();continue;}
+            p.fallDistance=0;
+            if(p.isOnGround()){land.remove();continue;}
+            e.setValue(new Landing(l.world(),l.ticks()-1));
+        }
         var it=ACTIVE.entrySet().iterator();
         while(it.hasNext()){
             var entry=it.next();var s=entry.getValue();
@@ -62,6 +74,14 @@ public final class GrappleRod extends Item {
                 it.remove();release(p);continue;
             }
             p.setVelocity(motion);p.velocityModified=true;p.fallDistance=0;
+            if(s.age()%4==0){
+                Vec3d start=p.getEyePos(),end=Vec3d.ofCenter(s.anchor());
+                int count=Math.min(24,Math.max(1,(int)start.distanceTo(end)));
+                for(int j=1;j<=count;j++){
+                    Vec3d q=start.lerp(end,j/(double)count);
+                    s.world().spawnParticles(net.minecraft.particle.ParticleTypes.END_ROD,q.x,q.y,q.z,1,0,0,0,0);
+                }
+            }
             int held=s.held()+(delta.length()<0.7?1:0);
             entry.setValue(new Session(s.world(),s.anchor(),s.target(),s.age()+1,held));
         }
