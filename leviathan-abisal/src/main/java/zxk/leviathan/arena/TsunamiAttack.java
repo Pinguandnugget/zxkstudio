@@ -30,7 +30,7 @@ public final class TsunamiAttack {
     private static void impact(ServerPlayerEntity p,ServerWorld world){
         // Normal lethal damage permits vanilla totem handling. Never remove items directly.
         p.damage(world.getDamageSources().generic(),10000);
-        if(p.isAlive())PULSES.add(new Pulse(world,p.getUuid(),clock+30));
+        if(p.isAlive()&&!p.isCreative()&&!p.isSpectator())PULSES.add(new Pulse(world,p.getUuid(),clock+30));
     }
     private static void tick(MinecraftServer server){
         clock++;
