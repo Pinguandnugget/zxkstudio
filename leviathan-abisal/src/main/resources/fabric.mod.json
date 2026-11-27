@@ -1,0 +1,1 @@
+{"schemaVersion":1,"id":"leviathan_abisal","version":"0.1.0-alpha","name":"Leviathan Abisal","environment":"*","entrypoints":{"main":["zxk.leviathan.LeviathanMod"],"client":["zxk.leviathan.LeviathanClient"]},"depends":{"fabricloader":">=0.16.0","minecraft":"1.21.1","java":">=21","fabric-api":"*","geckolib":">=4.7.6"}}
