@@ -43,15 +43,50 @@ public final class HatchClient implements ClientModInitializer {
                 matrices.push();
                 if(group.side()!=0) matrices.translate(group.side()*slide,0,depth);
                 MatrixStack.Entry matrix=matrices.peek();
-                for(Vertex v:group.vertices()) {
-                    float vx=group.side()==0?v.x():Math.max(-1.5f-group.side()*slide,Math.min(1.5f-group.side()*slide,v.x()));
-                    buffer.vertex(matrix,vx,v.y(),v.z()).color(255,255,255,255)
-                        .texture(v.u(),v.v()).overlay(overlay).light(light)
-                        .normal(matrix,v.nx(),v.ny(),v.nz());
+                if(group.side()==0) {
+                    for(Vertex v:group.vertices()) emit(buffer,matrix,v,light,overlay);
+                } else {
+                    float offset=group.side()*slide;
+                    List<Vertex> vertices=group.vertices();
+                    for(int i=0;i<vertices.size();i+=4) {
+                        List<Vertex> polygon=vertices.subList(i,i+4);
+                        polygon=clip(polygon,-1.5f-offset,true);
+                        polygon=clip(polygon,1.5f-offset,false);
+                        if(polygon.size()==4) {
+                            for(Vertex v:polygon) emit(buffer,matrix,v,light,overlay);
+                        } else for(int k=1;k+1<polygon.size();k++) {
+                            emit(buffer,matrix,polygon.get(0),light,overlay);
+                            emit(buffer,matrix,polygon.get(k),light,overlay);
+                            emit(buffer,matrix,polygon.get(k+1),light,overlay);
+                            emit(buffer,matrix,polygon.get(k+1),light,overlay);
+                        }
+                    }
                 }
                 matrices.pop();
             }
             matrices.pop();
+        }
+        private static void emit(VertexConsumer buffer,MatrixStack.Entry matrix,Vertex v,int light,int overlay) {
+            buffer.vertex(matrix,v.x(),v.y(),v.z()).color(255,255,255,255)
+                .texture(v.u(),v.v()).overlay(overlay).light(light).normal(matrix,v.nx(),v.ny(),v.nz());
+        }
+        // Clip polygons at the frame without squeezing the metal geometry or its UVs.
+        private static List<Vertex> clip(List<Vertex> input,float boundary,boolean lower) {
+            if(input.isEmpty()) return input;
+            List<Vertex> out=new ArrayList<>(6);
+            Vertex a=input.get(input.size()-1);
+            boolean insideA=lower?a.x()>=boundary:a.x()<=boundary;
+            for(Vertex b:input) {
+                boolean insideB=lower?b.x()>=boundary:b.x()<=boundary;
+                if(insideA!=insideB) {
+                    float t=(boundary-a.x())/(b.x()-a.x());
+                    out.add(new Vertex(boundary,a.y()+(b.y()-a.y())*t,a.z()+(b.z()-a.z())*t,
+                        a.u()+(b.u()-a.u())*t,a.v()+(b.v()-a.v())*t,a.nx(),a.ny(),a.nz()));
+                }
+                if(insideB) out.add(b);
+                a=b;insideA=insideB;
+            }
+            return out;
         }
         private static float sample(float[] values,float t) {
             for(int i=1;i<TIMES.length;i++) if(t<=TIMES[i]) {

@@ -30,7 +30,24 @@ public final class HatchEntity extends BlockEntity {
     private boolean motionOpen=false, manualOpen=false, openedOnce=false;
 
     public HatchEntity(BlockPos pos, BlockState state) { super(Hatches.TYPE,pos,state); }
-    public float animation(float tickDelta) { return MathHelper.lerp(tickDelta,lastProgress,progress)/DURATION; }
+    // Render-time animation is independent of the arrival rate of block-entity NBT packets.
+    // Only the synced block-state direction drives it; the server still owns collision and sealing.
+    private long visualTime;
+    private float visualProgress;
+    public float animation(float tickDelta) {
+        long now=System.nanoTime();
+        BlockState state=getCachedState();
+        boolean target=state.get(HatchBlock.OPENING);
+        if(visualTime==0L) {
+            visualTime=now;
+            visualProgress=state.get(HatchBlock.PASSABLE)?DURATION:0;
+            return visualProgress/DURATION;
+        }
+        float elapsed=Math.min(4f,Math.max(0f,(now-visualTime)/50_000_000f));
+        visualTime=now;
+        visualProgress=MathHelper.clamp(visualProgress+(target?elapsed:-elapsed),0f,(float)DURATION);
+        return visualProgress/DURATION;
+    }
     private Direction facing() { return getCachedState().get(HatchBlock.FACING); }
     private Vec3d relative(ServerPlayerEntity p) { return p.getBoundingBox().getCenter().subtract(Vec3d.ofCenter(pos)); }
     private double depth(Vec3d p) { Direction d=facing(); return p.x*d.getOffsetX()+p.z*d.getOffsetZ(); }
@@ -68,6 +85,11 @@ public final class HatchEntity extends BlockEntity {
         // Never begin or finish a close while a living entity occupies the opening.
         boolean blocked=!desired && progress>0 && playerObstructed(world,pos,facing);
         motionOpen=desired || blocked;
+        // A normal block-state update is reliably broadcast even if intermediate BE packets are coalesced.
+        BlockState centerState=world.getBlockState(pos);
+        if(centerState.get(HatchBlock.OPENING)!=motionOpen) {
+            world.setBlockState(pos,centerState.with(HatchBlock.OPENING,motionOpen),Block.NOTIFY_ALL);
+        }
         if(motionOpen) progress=Math.min(DURATION,progress+1);
         else progress=Math.max(0,progress-1);
         if(oldMotion!=motionOpen && oldProgress!=progress) {
@@ -95,7 +117,10 @@ public final class HatchEntity extends BlockEntity {
                 if(p!=null) p.sendMessage(Text.literal("§7[Escotilla] §cAcceso sellado."),true);
             }
         }
-        if(oldProgress!=progress || oldMode!=mode || oldMotion!=motionOpen) sync(world);
+        if(oldProgress!=progress || oldMode!=mode || oldMotion!=motionOpen) {
+            markDirty();
+            if(oldMode!=mode || oldMotion!=motionOpen || progress==0 || progress==DURATION) sync(world);
+        }
     }
 
     private void tryStart(ServerWorld world, ServerPlayerEntity initiator) {

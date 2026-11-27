@@ -21,6 +21,7 @@ public final class HatchBlock extends BlockWithEntity {
     public static final EnumProperty<Direction> FACING = Properties.HORIZONTAL_FACING;
     public static final IntProperty PART = IntProperty.of("part", 0, 8);
     public static final BooleanProperty PASSABLE = BooleanProperty.of("passable");
+    public static final BooleanProperty OPENING = BooleanProperty.of("opening");
     public static final int CENTER = 4;
     private static final VoxelShape[][][] SHAPES = new VoxelShape[4][9][2];
     private static final ThreadLocal<Boolean> REMOVING = ThreadLocal.withInitial(() -> false);
@@ -51,10 +52,10 @@ public final class HatchBlock extends BlockWithEntity {
 
     public HatchBlock(Settings settings) {
         super(settings);
-        setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.SOUTH).with(PART,CENTER).with(PASSABLE,false));
+        setDefaultState(getStateManager().getDefaultState().with(FACING, Direction.SOUTH).with(PART,CENTER).with(PASSABLE,false).with(OPENING,false));
     }
     @Override public MapCodec<HatchBlock> getCodec() { return CODEC; }
-    @Override protected void appendProperties(StateManager.Builder<Block,BlockState> builder) { builder.add(FACING,PART,PASSABLE); }
+    @Override protected void appendProperties(StateManager.Builder<Block,BlockState> builder) { builder.add(FACING,PART,PASSABLE,OPENING); }
     @Override protected BlockRenderType getRenderType(BlockState state) { return BlockRenderType.INVISIBLE; }
     @Override public BlockEntity createBlockEntity(BlockPos pos, BlockState state) {
         return state.get(PART)==CENTER ? new HatchEntity(pos,state) : null;
