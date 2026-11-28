@@ -62,13 +62,27 @@ public class LeviathanEntity extends HostileEntity implements GeoEntity {
  private ServerPlayerEntity resolveVictim(){if(victim==null||!(getWorld() instanceof ServerWorld sw))return null;var p=sw.getServer().getPlayerManager().getPlayer(victim);return p!=null&&p.isAlive()&&!p.isRemoved()&&p.getWorld()==sw&&!p.isCreative()&&!p.isSpectator()&&squaredDistanceTo(p)<=900?p:null;}
  private void biteTick(){
   if(time<30||time>=230){captured=false;return;}
-  var p=resolveVictim();if(p==null){victim=null;captured=false;return;}
+  if(!(getWorld() instanceof ServerWorld sw))return;
   Vec3d mouth=BiteSocket.position(this,time);
-  if(time==30){captured=p.getPos().add(0,0.9,0).distanceTo(mouth)<7;}
+  if(time==30){
+   // Select the closest eligible player to the moving mouth, not the command operator.
+   var chosen=sw.getPlayers().stream()
+    .filter(p->p.isAlive()&&!p.isRemoved()&&!p.isCreative()&&!p.isSpectator()&&p.squaredDistanceTo(this)<=900&&p.getPos().squaredDistanceTo(mouth)<=900)
+    .min(java.util.Comparator.comparingDouble(p->p.getPos().squaredDistanceTo(mouth))).orElse(null);
+   victim=chosen==null?null:chosen.getUuid();captured=chosen!=null;
+   if(captured){chosen.sendMessage(Text.literal("¡El Leviathan te ha atrapado!"),true);getWorld().playSound(null,getBlockPos(),LeviathanSounds.ALTERNATE,net.minecraft.sound.SoundCategory.HOSTILE,.9f,1f);}
+  }
   if(!captured)return;
+  var p=resolveVictim();if(p==null){victim=null;captured=false;return;}
   Vec3d target=mouth.add(0,-0.9,0);
-  if(!getWorld().isSpaceEmpty(p,p.getBoundingBox().offset(target.subtract(p.getPos())))){captured=false;victim=null;return;}
-  p.networkHandler.requestTeleport(target.x,target.y,target.z,p.getYaw(),p.getPitch());
+  // Ignore the boss's own entity collision, but never place players inside solid blocks.
+  Vec3d safe=null;
+  for(double dy:new double[]{0,.5,-.5,1,-1,1.5,-1.5,2,-2}){
+   Vec3d candidate=target.add(0,dy,0);
+   if(!sw.getBlockCollisions(p,p.getBoundingBox().offset(candidate.subtract(p.getPos()))).iterator().hasNext()){safe=candidate;break;}
+  }
+  if(safe==null){captured=false;victim=null;return;}
+  p.networkHandler.requestTeleport(safe.x,safe.y,safe.z,p.getYaw(),p.getPitch());
   p.setVelocity(Vec3d.ZERO);p.velocityModified=true;p.fallDistance=0;
   if(time>=60&&time<=210&&(time-60)%30==0){float amount=Math.min(10000f,Math.max(40f,(p.getHealth()+p.getAbsorptionAmount())*4f));p.damage(getDamageSources().mobAttack(this),amount);if(!p.isAlive()||p.isRemoved()){victim=null;captured=false;}}
  }
