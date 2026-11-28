@@ -40,11 +40,8 @@ public final class CinematicEntity extends Entity implements GeoEntity {
             stage("ascend_to_arena");sound(LeviathanSounds.DISTANT_ROAR,.9f);
         }
         if(age>=1000){
-            var boss=LeviathanMod.BOSS.create(world);
-            if(boss!=null){
-                boss.refreshPositionAndAngles(destination.x,destination.y,destination.z,facing,0);
-                if(world.spawnEntity(boss))boss.beginAppearance();
-            }
+            for(var player:world.getPlayers())if(player.getPos().squaredDistanceTo(getPos())<128*128)
+                player.sendMessage(net.minecraft.text.Text.literal("Cinemática finalizada."),true);
             discard();
         }
     }
