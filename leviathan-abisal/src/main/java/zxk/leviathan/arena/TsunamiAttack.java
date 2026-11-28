@@ -25,7 +25,7 @@ public final class TsunamiAttack {
             if(visual!=null){visual.refreshPositionAndAngles(floor.x,floor.y,floor.z,0,0);if(!world.spawnEntity(visual))visual=null;}
         }
         WAVES.add(new Active(world,new RadialWave(floor,100,8,.5),visual));
-        world.playSound(null,net.minecraft.util.math.BlockPos.ofFloored(floor),zxk.leviathan.LeviathanSounds.roar(),net.minecraft.sound.SoundCategory.HOSTILE,5f,.9f);
+        world.playSound(null,net.minecraft.util.math.BlockPos.ofFloored(floor),zxk.leviathan.LeviathanSounds.roar(),net.minecraft.sound.SoundCategory.HOSTILE,1f,1f);
         for(var p:world.getPlayers())if(p.getPos().squaredDistanceTo(floor)<110*110)p.sendMessage(Text.literal("¡TSUNAMI ABISAL! Busca un ancla elevada."),true);
         return true;
     }
