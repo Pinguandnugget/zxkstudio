@@ -1,7 +1,94 @@
 {
   "roar": {
     "sounds": [
-      "leviathan_abisal:roar"
+      {
+        "name": "leviathan_abisal:leviathan_rugido_principal_01",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_principal_02",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_principal_03",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_principal_04",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_principal_05",
+        "attenuation_distance": 100
+      }
+    ]
+  },
+  "ambient": {
+    "sounds": [
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_01",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_02",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_03",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_04",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_05",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_ambiente_lejano_06",
+        "attenuation_distance": 64
+      }
+    ]
+  },
+  "distant_roar": {
+    "sounds": [
+      {
+        "name": "leviathan_abisal:leviathan_rugido_lejano_01",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_lejano_02",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_lejano_03",
+        "attenuation_distance": 100
+      },
+      {
+        "name": "leviathan_abisal:leviathan_rugido_lejano_04",
+        "attenuation_distance": 100
+      }
+    ]
+  },
+  "alternate": {
+    "sounds": [
+      {
+        "name": "leviathan_abisal:leviathan_sonido_alternativo_01",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_sonido_alternativo_02",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_sonido_alternativo_03",
+        "attenuation_distance": 64
+      },
+      {
+        "name": "leviathan_abisal:leviathan_sonido_alternativo_04",
+        "attenuation_distance": 64
+      }
     ]
   }
 }
