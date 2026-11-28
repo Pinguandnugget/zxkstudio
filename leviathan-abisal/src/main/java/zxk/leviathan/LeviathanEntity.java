@@ -42,7 +42,7 @@ public class LeviathanEntity extends HostileEntity implements GeoEntity {
  public boolean testAttack(String name){if(dying||!action.isEmpty())return false;for(int i=0;i<ATTACKS.length;i++)if(ATTACKS[i].equals(name)){var p=getWorld().getClosestPlayer(this,100);victim=p instanceof ServerPlayerEntity sp?sp.getUuid():null;start(name,LENGTHS[i]);return true;}if(name.equals("attack_tsunami")&&getWorld() instanceof ServerWorld sw){start("attack_pressure_roar",120);return TsunamiAttack.start(sw,getPos());}return false;}
  private void lethal(ServerPlayerEntity p){if(p.isAlive())p.damage(getDamageSources().mobAttack(this),10000f);}
  private void attackEffects(){
-  if(time==20&&(action.equals("attack_suction")||action.equals("attack_pressure_roar")||action.equals("breach_roar")||action.equals("phase_transition")))getWorld().playSound(null,getBlockPos(),LeviathanSounds.roar(),net.minecraft.sound.SoundCategory.HOSTILE,5f,1f);
+  if(time==20&&(action.equals("attack_suction")||action.equals("attack_pressure_roar")||action.equals("breach_roar")||action.equals("phase_transition")))getWorld().playSound(null,getBlockPos(),LeviathanSounds.roar(),net.minecraft.sound.SoundCategory.HOSTILE,1.2f,1f);
   if(!(getWorld() instanceof ServerWorld sw))return;
   for(var p:sw.getPlayers()){
    if(!p.isAlive()||p.isCreative()||p.isSpectator()||p.getPos().squaredDistanceTo(getPos())>10000)continue;
