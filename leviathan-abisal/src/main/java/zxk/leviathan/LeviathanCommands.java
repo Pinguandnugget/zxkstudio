@@ -21,6 +21,7 @@ public final class LeviathanCommands {
             var root = literal("leviathan").requires(s -> s.hasPermissionLevel(2));
             root.then(literal("spawn").executes(c -> spawn(c.getSource())));
             root.then(literal("start").executes(c -> cinematic(c.getSource())));
+            root.then(literal("cinematic").executes(c -> cinematic(c.getSource())));
             var attack = argument("attack", StringArgumentType.word())
                 .suggests((c, b) -> {
                     for (String name : ATTACKS) b.suggest(name);
@@ -48,15 +49,10 @@ public final class LeviathanCommands {
 
     private static int cinematic(ServerCommandSource source) {
         var world=source.getWorld();
-        Vec3d destination=source.getPosition();
+        Vec3d origin=source.getPosition();
         float yaw=source.getRotation().y;
-        // Root translations in Full assets: swim 855, ascend 190 forward and 850 upward (model units).
         Vec3d travel=new Vec3d(0,850.0/16,-1045.0/16).rotateY((float)Math.toRadians(-yaw));
-        Vec3d origin=destination.subtract(travel);
-        if(origin.y<world.getBottomY()+2){
-            source.sendError(Text.literal("No hay profundidad suficiente para la cinemática completa (54 bloques). Usa /leviathan spawn."));
-            return 0;
-        }
+        Vec3d destination=origin.add(travel);
         if(!world.isChunkLoaded(net.minecraft.util.math.BlockPos.ofFloored(origin))){
             source.sendError(Text.literal("Carga primero los chunks de la fosa cinematográfica."));
             return 0;
@@ -66,7 +62,7 @@ public final class LeviathanCommands {
         full.refreshPositionAndAngles(origin.x,origin.y,origin.z,yaw,0);
         full.configure(destination,yaw);
         if(!world.spawnEntity(full))return 0;
-        source.sendFeedback(()->Text.literal("Cinemática del Leviathan iniciada (66 segundos)."),false);
+        source.sendFeedback(()->Text.literal("Cinemática iniciada (50 segundos). El boss se invoca por separado con /leviathan spawn."),false);
         return 1;
     }
 
